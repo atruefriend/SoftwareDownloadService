@@ -1,6 +1,13 @@
 import React, { Component } from "react";
 import "semantic-ui-css/semantic.min.css";
-import { Form, Select, Input, Label, Button } from "semantic-ui-react";
+import {
+  Form,
+  Select,
+  Input,
+  Label,
+  Button,
+  TextArea
+} from "semantic-ui-react";
 
 class NewRequest extends Component {
   state = {
@@ -22,6 +29,7 @@ class NewRequest extends Component {
     this.state.isFree = 1;
     this.state.teamLead = "";
     this.handleChangeValue = this.handleChangeValue.bind(this);
+    this.createNewRequest = this.createNewRequest.bind(this);
   }
   formStyles = {
     marginRight: 20,
@@ -39,6 +47,20 @@ class NewRequest extends Component {
     { key: 2, text: "Gaurav Sharma", value: 2 },
     { key: 3, text: "Ankit Kumar Garg", value: 3 }
   ];
+
+  createNewRequest(e) {
+    if (this.validate(e)) {
+      //save data
+    }
+  }
+
+  validate(e) {
+    if (this.state.softwareName === "") {
+      console.log(e);
+      return false;
+    }
+    return true;
+  }
 
   handleChangeValue(e) {
     const target = e.target;
@@ -114,13 +136,13 @@ class NewRequest extends Component {
         </Form.Field>
         <Form.Field>
           <label>Reason</label>
-          <input
+          <TextArea
             name="txtReason"
             type="text"
             placeholder="Meri Marzi"
             value={this.state.reason}
             onChange={this.handleChangeValue}
-          ></input>
+          ></TextArea>
         </Form.Field>
         <Form.Field>
           <Select
@@ -141,7 +163,7 @@ class NewRequest extends Component {
           ></Select>
         </Form.Field>
         <Form.Field>
-          <Button name="btnCreateReq" positive>
+          <Button name="btnCreateReq" positive onClick={this.createNewRequest}>
             Create Request
           </Button>
         </Form.Field>
