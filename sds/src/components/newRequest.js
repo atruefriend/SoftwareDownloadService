@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import ReactDom from "react-dom";
 import "semantic-ui-css/semantic.min.css";
 import {
   Form,
@@ -6,19 +7,13 @@ import {
   Input,
   Label,
   Button,
-  TextArea
+  TextArea,
+  Modal,
+  Header
 } from "semantic-ui-react";
 
 class NewRequest extends Component {
-  state = {
-    softwareName: "",
-    tags: "",
-    downloadUrl: "",
-    version: "",
-    reason: "",
-    isFree: 1,
-    teamLead: ""
-  };
+  state = {};
   constructor(props) {
     super(props);
     this.state.softwareName = "";
@@ -27,9 +22,11 @@ class NewRequest extends Component {
     this.state.version = "";
     this.state.reason = "";
     this.state.isFree = 1;
-    this.state.teamLead = "";
+    this.state.teamLead = 0;
     this.handleChangeValue = this.handleChangeValue.bind(this);
     this.createNewRequest = this.createNewRequest.bind(this);
+    this.renderRequiredField = this.renderRequiredField.bind(this);
+    this.handleSelectionChange = this.handleSelectionChange.bind(this);
   }
   formStyles = {
     marginRight: 20,
@@ -48,45 +45,100 @@ class NewRequest extends Component {
     { key: 3, text: "Ankit Kumar Garg", value: 3 }
   ];
 
+  renderRequiredField(props) {
+    if (props.name === "softwareName") {
+      if (this.state.softwareName === "") {
+        return (
+          <Label basic color="red" pointing>
+            Please enter a software name.
+          </Label>
+        );
+      } else {
+        return null;
+      }
+    } else if (props.name === "reason") {
+      if (this.state.reason === "") {
+        return (
+          <Label basic color="red" pointing>
+            Please enter a reason, why you want this software.
+          </Label>
+        );
+      } else {
+        return null;
+      }
+    } else if (props.name === "teamLead") {
+      if (this.state.teamLead === 0) {
+        return (
+          <Label basic color="red" pointing>
+            Please select your team lead.
+          </Label>
+        );
+      } else {
+        return null;
+      }
+    }
+    return null;
+  }
+
   createNewRequest(e) {
+    //debugger;
     if (this.validate(e)) {
       //save data
+    } else {
+      //error;
+      alert("Please resolve form errors");
     }
   }
 
   validate(e) {
-    if (this.state.softwareName === "") {
-      console.log(e);
+    if (
+      this.state.softwareName === "" ||
+      this.state.reason === "" ||
+      this.state.teamLead === 0
+    ) {
       return false;
     }
     return true;
   }
 
+  handleSelectionChange(e, data) {
+    const name = data.name;
+    const value = data.value;
+    this.updateState(name, value);
+  }
+
   handleChangeValue(e) {
     const target = e.target;
     const name = target.name;
+    const value = target.value;
 
+    this.updateState(name, value);
+  }
+
+  updateState(name, value) {
     switch (name) {
       case "txtSoftwareName":
-        this.setState({ softwareName: target.value });
+        this.setState({ softwareName: value });
         break;
       case "txtTags":
-        this.setState({ tags: target.value });
+        this.setState({ tags: value });
         break;
       case "txtDownloadUrl":
-        this.setState({ downloadUrl: target.value });
+        this.setState({ downloadUrl: value });
         break;
       case "txtVersion":
-        this.setState({ version: target.value });
+        this.setState({ version: value });
         break;
       case "txtReason":
-        this.setState({ reason: target.value });
+        this.setState({ reason: value });
         break;
       case "cmbIsFree":
-        this.setState({ isFree: target.value });
+        this.setState({ isFree: value });
         break;
       case "cmbTeamLead":
-        this.setState({ teamLead: target.value });
+        this.setState({ teamLead: value });
+        break;
+      default:
         break;
     }
   }
@@ -103,6 +155,7 @@ class NewRequest extends Component {
             value={this.state.softwareName}
             onChange={this.handleChangeValue}
           ></input>
+          <this.renderRequiredField name="softwareName"></this.renderRequiredField>
         </Form.Field>
         <Form.Field>
           <label>Tags</label>
@@ -143,14 +196,14 @@ class NewRequest extends Component {
             value={this.state.reason}
             onChange={this.handleChangeValue}
           ></TextArea>
+          <this.renderRequiredField name="reason"></this.renderRequiredField>
         </Form.Field>
         <Form.Field>
           <Select
             name="cmbIsFree"
             placeholder="Is Free"
             options={this.isFreeOptions}
-            value={this.state.isFree}
-            onChange={this.handleChangeValue}
+            onChange={this.handleSelectionChange}
           ></Select>
         </Form.Field>
         <Form.Field>
@@ -158,9 +211,9 @@ class NewRequest extends Component {
             name="cmbTeamLead"
             placeholder="Team Lead"
             options={this.teamLeadOptions}
-            value={this.state.teamLead}
-            onChange={this.handleChangeValue}
+            onChange={this.handleSelectionChange}
           ></Select>
+          <this.renderRequiredField name="teamLead"></this.renderRequiredField>
         </Form.Field>
         <Form.Field>
           <Button name="btnCreateReq" positive onClick={this.createNewRequest}>
