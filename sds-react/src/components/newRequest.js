@@ -101,7 +101,7 @@ class NewRequest extends Component {
       isFree: this.state.isFree,
       teamLead: this.state.teamLead
     };
-    return data;
+    return JSON.stringify(data);
   }
 
   validate(e) {

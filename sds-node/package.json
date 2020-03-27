@@ -2,7 +2,7 @@
   "name": "sds-node",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/build/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc",
@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/express": "^4.17.3",
+    "cors": "^2.8.5",
     "express": "^4.17.1"
   }
 }
