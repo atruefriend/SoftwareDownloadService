@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import ReactDom from "react-dom";
 import "semantic-ui-css/semantic.min.css";
+import Api from "../Api";
 import {
   Form,
   Select,
@@ -81,13 +82,26 @@ class NewRequest extends Component {
   }
 
   createNewRequest(e) {
-    //debugger;
+    debugger;
     if (this.validate(e)) {
-      //save data
+      const res = Api.PostData("newRequest", this.buildData());
     } else {
       //error;
       alert("Please resolve form errors");
     }
+  }
+
+  buildData() {
+    const data = {
+      softwareName: this.state.softwareName,
+      tags: this.state.tags,
+      downloadUrl: this.state.downloadUrl,
+      version: this.state.version,
+      reason: this.state.reason,
+      isFree: this.state.isFree,
+      teamLead: this.state.teamLead
+    };
+    return data;
   }
 
   validate(e) {
