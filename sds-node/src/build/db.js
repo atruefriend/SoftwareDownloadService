@@ -39,60 +39,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-var bodyParser = require("body-parser");
-var db_1 = __importDefault(require("./db"));
-var sql = require("mssql");
-var cors = require("cors");
-var app = express_1.default();
-var port = 8080;
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(bodyParser.raw());
-app.get("/", function (req, res) {
-    res.send("Get request executed successfully!");
-});
-app.post("/", function (req, res, next) {
-    res.send("Post request executed successfully!");
-});
-app.post("/newRequest", function (req, res) {
+var mssql_1 = __importDefault(require("mssql"));
+var config = {
+    user: "sa",
+    password: "nikhil",
+    server: "LAPTOP-83SSJD6E\\SQLEXPRESS",
+    database: "SDS",
+    options: {
+        instanceName: "SQLEXPRESS",
+        trustedConnection: true
+    }
+};
+function callStoredProcedure(procedureName, params) {
     return __awaiter(this, void 0, void 0, function () {
-        var softwareName, tags, downloadUrl, version, reason, isFree, teamLead, userId, params, result;
+        var pool, request_1, res, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    softwareName = req.body.softwareName;
-                    tags = req.body.tags;
-                    downloadUrl = req.body.downloadUrl;
-                    version = req.body.version;
-                    reason = req.body.reason;
-                    isFree = req.body.isFree;
-                    teamLead = req.body.teamLead;
-                    userId = 1;
-                    params = [
-                        { name: "UserID", value: userId, type: sql.Int },
-                        { name: "SoftwareName", value: softwareName, type: sql.VarChar(500) },
-                        { name: "Tags", value: tags, type: sql.VarChar(500) },
-                        { name: "DownloadUrl", value: downloadUrl, type: sql.VarChar(500) },
-                        { name: "Version", value: version, type: sql.VarChar(200) },
-                        { name: "Reason", value: reason, type: sql.VarChar(1000) },
-                        { name: "FreePaid", value: isFree, type: sql.Int },
-                        { name: "TeamLead", value: teamLead, type: sql.Int }
-                    ];
-                    return [4 /*yield*/, db_1.default.callStoredProcedure("AddRequest", params)];
+                    _a.trys.push([0, 4, , 5]);
+                    pool = new mssql_1.default.ConnectionPool(config);
+                    return [4 /*yield*/, pool.connect()];
                 case 1:
-                    result = _a.sent();
-                    res.send("Request created successfully!" + result);
-                    return [2 /*return*/];
+                    _a.sent();
+                    return [4 /*yield*/, pool.request()];
+                case 2:
+                    request_1 = _a.sent();
+                    params.map(function (param) {
+                        request_1.input(param["name"], param["type"], param["value"]);
+                    });
+                    return [4 /*yield*/, request_1.execute(procedureName)];
+                case 3:
+                    res = _a.sent();
+                    console.log(res);
+                    return [2 /*return*/, res];
+                case 4:
+                    err_1 = _a.sent();
+                    console.log(err_1);
+                    return [2 /*return*/, err_1];
+                case 5: return [2 /*return*/];
             }
         });
     });
-});
-app.listen(port, function (err) {
-    if (err) {
-        return console.log(err);
-    }
-    return console.log("App is running successfully on port: " + port);
-});
-//# sourceMappingURL=app.js.map
+}
+exports.dbMethods = {
+    callStoredProcedure: callStoredProcedure
+};
+exports.default = exports.dbMethods;
+//# sourceMappingURL=db.js.map

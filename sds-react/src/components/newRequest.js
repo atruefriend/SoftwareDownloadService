@@ -85,6 +85,7 @@ class NewRequest extends Component {
     debugger;
     if (this.validate(e)) {
       const res = Api.PostData("newRequest", this.buildData());
+      alert("Request created successfully!");
     } else {
       //error;
       alert("Please resolve form errors");
