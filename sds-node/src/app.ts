@@ -15,6 +15,12 @@ app.get("/", function(req, res) {
   res.send("Get request executed successfully!");
 });
 
+app.get("/getRequests", async function(req, res) {
+  const params = req.params;
+  const data = await db.callStoredProcedure("GetRequets", []);
+  res.send(data);
+});
+
 app.post("/", function(req, res, next) {
   res.send("Post request executed successfully!");
 });

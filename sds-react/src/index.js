@@ -4,10 +4,11 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import NewRequest from "../src/components/newRequest";
+import ListRequests from "../src/components/listRequests";
 
 ReactDOM.render(
   <React.StrictMode>
-    <NewRequest />
+    <ListRequests />
   </React.StrictMode>,
   document.getElementById("root")
 );

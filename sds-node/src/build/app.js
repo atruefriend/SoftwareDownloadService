@@ -53,6 +53,22 @@ app.use(bodyParser.raw());
 app.get("/", function (req, res) {
     res.send("Get request executed successfully!");
 });
+app.get("/getRequests", function (req, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var params, data;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    params = req.params;
+                    return [4 /*yield*/, db_1.default.callStoredProcedure("GetRequets", [])];
+                case 1:
+                    data = _a.sent();
+                    res.send(data);
+                    return [2 /*return*/];
+            }
+        });
+    });
+});
 app.post("/", function (req, res, next) {
     res.send("Post request executed successfully!");
 });
@@ -83,7 +99,7 @@ app.post("/newRequest", function (req, res) {
                     return [4 /*yield*/, db_1.default.callStoredProcedure("AddRequest", params)];
                 case 1:
                     result = _a.sent();
-                    res.send("Request created successfully!" + result);
+                    res.send("Request created successfully!");
                     return [2 /*return*/];
             }
         });

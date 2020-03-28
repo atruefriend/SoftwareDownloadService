@@ -19,9 +19,11 @@ async function callStoredProcedure(
     let pool = new sql.ConnectionPool(config);
     await pool.connect();
     let request = await pool.request();
-    params.map(param => {
-      request.input(param["name"], param["type"], param["value"]);
-    });
+    if (params != null) {
+      params.map(param => {
+        request.input(param["name"], param["type"], param["value"]);
+      });
+    }
     let res = await request.execute(procedureName);
 
     console.log(res);

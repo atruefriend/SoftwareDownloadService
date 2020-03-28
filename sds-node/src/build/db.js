@@ -64,9 +64,11 @@ function callStoredProcedure(procedureName, params) {
                     return [4 /*yield*/, pool.request()];
                 case 2:
                     request_1 = _a.sent();
-                    params.map(function (param) {
-                        request_1.input(param["name"], param["type"], param["value"]);
-                    });
+                    if (params != null) {
+                        params.map(function (param) {
+                            request_1.input(param["name"], param["type"], param["value"]);
+                        });
+                    }
                     return [4 /*yield*/, request_1.execute(procedureName)];
                 case 3:
                     res = _a.sent();
