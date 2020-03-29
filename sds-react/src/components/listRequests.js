@@ -1,12 +1,15 @@
 import React, { Component } from "react";
 import Api from "../Api";
-import { Form, Input, Button } from "semantic-ui-react";
+import { Form, Input, Button, List } from "semantic-ui-react";
 import NewRequest from "./newRequest";
 
 class ListRequests extends Component {
-  state = {};
+  state = {
+    requests: []
+  };
   constructor(props) {
     super(props);
+    this.getData = this.getData.bind(this);
   }
   formStyles = {
     marginRight: 20,
@@ -16,11 +19,32 @@ class ListRequests extends Component {
   componentDidMount() {
     //debugger;
     //
+    this.getData();
   }
-  getData(e) {
-    const requests = Api.GetData("getRequests", null);
-    console.log(requests);
+  async getData(e) {
+    let serviceResponse = null;
+    await Api.GetData("getRequests", null).then(response => {
+      serviceResponse = response;
+    });
+    if (serviceResponse !== null && serviceResponse !== undefined) {
+      let requestsList = [];
+      serviceResponse.recordset.map(record => {
+        requestsList.push(
+          <List.Item key={record.RequestID}>
+            <List.Content>
+              <List.Header as="a">{record.SoftwareName}</List.Header>
+              <List.Description as="a">
+                <p>tags : {record.Tags}</p>
+                version : {record.Version}
+              </List.Description>
+            </List.Content>
+          </List.Item>
+        );
+      });
+      this.setState({ requests: requestsList });
+    }
   }
+
   render() {
     return (
       <Form style={this.formStyles}>
@@ -33,6 +57,11 @@ class ListRequests extends Component {
             New Request
           </Form.Button>
         </Form.Group>
+        <Form.Field>
+          <List name="lstRequests" divided relaxed>
+            {this.state.requests}
+          </List>
+        </Form.Field>
       </Form>
     );
   }

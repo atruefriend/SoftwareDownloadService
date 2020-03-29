@@ -72,7 +72,7 @@ function callStoredProcedure(procedureName, params) {
                     return [4 /*yield*/, request_1.execute(procedureName)];
                 case 3:
                     res = _a.sent();
-                    console.log(res);
+                    //console.log(res);
                     return [2 /*return*/, res];
                 case 4:
                     err_1 = _a.sent();

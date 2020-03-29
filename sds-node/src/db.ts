@@ -26,7 +26,7 @@ async function callStoredProcedure(
     }
     let res = await request.execute(procedureName);
 
-    console.log(res);
+    //console.log(res);
     return res;
   } catch (err) {
     console.log(err);
