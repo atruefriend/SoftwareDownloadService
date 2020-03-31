@@ -16,8 +16,26 @@ app.get("/", function(req, res) {
 });
 
 app.get("/getRequests", async function(req, res) {
-  const params = req.params;
-  const data = await db.callStoredProcedure("GetRequets", []);
+  const queryString = req.query;
+  const softwareName = queryString.softwareName;
+  const requestId = queryString.requestId;
+
+  const params = [];
+  if (softwareName !== undefined) {
+    params.push({
+      name: "SoftwareName",
+      value: softwareName,
+      type: sql.VarChar(500)
+    });
+  }
+  if (requestId !== undefined) {
+    params.push({
+      name: "RequestID",
+      value: requestId,
+      type: sql.Int
+    });
+  }
+  const data = await db.callStoredProcedure("GetRequets", params);
   res.send(data);
 });
 

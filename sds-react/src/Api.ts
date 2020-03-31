@@ -21,9 +21,12 @@ async function GetData(
   let params = "";
   if (data != null) {
     data.map(param => {
-      params += param["name"] + ":" + param["value"] + "/";
+      if (param["value"] !== "") {
+        params += param["name"] + "=" + param["value"] + "&";
+      }
     });
   }
+  params = params.substring(0, params.length - 1);
   const endpoint = server + method + (data != null ? "?" + params : "");
   const apiResponse = await fetch(endpoint, {
     method: "Get"

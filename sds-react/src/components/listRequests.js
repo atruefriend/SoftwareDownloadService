@@ -1,15 +1,21 @@
 import React, { Component } from "react";
 import Api from "../Api";
-import { Form, Input, Button, List } from "semantic-ui-react";
+import { Form, Input, Button, List, Modal } from "semantic-ui-react";
 import NewRequest from "./newRequest";
 
 class ListRequests extends Component {
   state = {
-    requests: []
+    requests: [],
+    showRequest: false,
+    requestId: 0
   };
   constructor(props) {
     super(props);
+    this.showRequest = false;
+    this.requestId = 0;
+    this.search = React.createRef();
     this.getData = this.getData.bind(this);
+    this.closeRequestForm = this.closeRequestForm.bind(this);
   }
   formStyles = {
     marginRight: 20,
@@ -23,7 +29,9 @@ class ListRequests extends Component {
   }
   async getData(e) {
     let serviceResponse = null;
-    await Api.GetData("getRequests", null).then(response => {
+    const s = this.search.current.value;
+    const params = [{ name: "softwareName", value: s }];
+    await Api.GetData("getRequests", params).then(response => {
       serviceResponse = response;
     });
     if (serviceResponse !== null && serviceResponse !== undefined) {
@@ -45,17 +53,49 @@ class ListRequests extends Component {
     }
   }
 
+  showRequestForm(id, e) {
+    this.setState({ requestId: id });
+    this.setState({ showRequest: true });
+  }
+
+  closeRequestForm(e) {
+    this.setState({ showRequest: false });
+  }
+
   render() {
     return (
       <Form style={this.formStyles}>
         <Form.Group widths="equal">
-          <Form.Input fluid name="txtSearch" placeholder="Search..." />
+          <input
+            type="text"
+            defaultValue=""
+            fluid
+            name="txtSearch"
+            ref={this.search}
+            placeholder="Search..."
+          />
           <Form.Button name="btnSearch" color="facebook" onClick={this.getData}>
             Search
           </Form.Button>
-          <Form.Button name="btnNewRequest" positive>
+          <Form.Button
+            name="btnNewRequest"
+            onClick={this.showRequestForm.bind(this, 0)}
+            positive
+          >
             New Request
           </Form.Button>
+          <Modal
+            open={this.state.showRequest}
+            onClose={this.closeRequestForm}
+            size="small"
+          >
+            <Modal.Content>
+              <NewRequest
+                requestId={this.state.requestId}
+                closeForm={this.closeRequestForm}
+              ></NewRequest>
+            </Modal.Content>
+          </Modal>
         </Form.Group>
         <Form.Field>
           <List name="lstRequests" divided relaxed>

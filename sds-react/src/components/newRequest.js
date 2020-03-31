@@ -17,6 +17,8 @@ class NewRequest extends Component {
   state = {};
   constructor(props) {
     super(props);
+    this.requestId = props.requestId;
+    this.close = props.closeForm;
     this.state.softwareName = "";
     this.state.tags = "";
     this.state.downloadUrl = "";
@@ -28,6 +30,7 @@ class NewRequest extends Component {
     this.createNewRequest = this.createNewRequest.bind(this);
     this.renderRequiredField = this.renderRequiredField.bind(this);
     this.handleSelectionChange = this.handleSelectionChange.bind(this);
+    this.getRequestForRequestId = this.getRequestForRequestId.bind(this);
   }
   formStyles = {
     marginRight: 20,
@@ -81,11 +84,32 @@ class NewRequest extends Component {
     return null;
   }
 
+  async getRequestForRequestId(e) {
+    if (this.requestId !== 0) {
+      const params = [{ name: "requestId", value: this.requestId }];
+      const serviceResponse = await Api.GetData("getRequests", params);
+      if (serviceResponse !== null && serviceResponse !== undefined) {
+        const requestData = serviceResponse.recordset[0];
+        this.updateState("txtSoftwareName", requestData.SoftwareName);
+        this.updateState("txtTags", requestData.Tags);
+        this.updateState("txtDownloadUrl", requestData.DownloadUrl);
+        this.updateState("txtVersion", requestData.Version);
+        this.updateState("txtReason", requestData.Reason);
+        this.updateState("cmbIsFree", requestData.FreePaid);
+        this.updateState("cmbTeamLead", requestData.TeamLead);
+      }
+    }
+  }
+
+  componentDidMount() {
+    this.getRequestForRequestId();
+  }
+
   createNewRequest(e) {
-    debugger;
     if (this.validate(e)) {
       const res = Api.PostData("newRequest", this.buildData());
       alert("Request created successfully!");
+      this.props.closeForm();
     } else {
       //error;
       alert("Please resolve form errors");

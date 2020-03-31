@@ -55,12 +55,29 @@ app.get("/", function (req, res) {
 });
 app.get("/getRequests", function (req, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var params, data;
+        var queryString, softwareName, requestId, params, data;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    params = req.params;
-                    return [4 /*yield*/, db_1.default.callStoredProcedure("GetRequets", [])];
+                    queryString = req.query;
+                    softwareName = queryString.softwareName;
+                    requestId = queryString.requestId;
+                    params = [];
+                    if (softwareName !== undefined) {
+                        params.push({
+                            name: "SoftwareName",
+                            value: softwareName,
+                            type: sql.VarChar(500)
+                        });
+                    }
+                    if (requestId !== undefined) {
+                        params.push({
+                            name: "RequestID",
+                            value: requestId,
+                            type: sql.Int
+                        });
+                    }
+                    return [4 /*yield*/, db_1.default.callStoredProcedure("GetRequets", params)];
                 case 1:
                     data = _a.sent();
                     res.send(data);
