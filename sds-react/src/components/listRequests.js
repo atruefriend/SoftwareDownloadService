@@ -6,16 +6,19 @@ import NewRequest from "./newRequest";
 class ListRequests extends Component {
   state = {
     requests: [],
+    requestData: {},
     showRequest: false,
     requestId: 0
   };
   constructor(props) {
     super(props);
+    this.state.requestData = {};
     this.showRequest = false;
     this.requestId = 0;
     this.search = React.createRef();
     this.getData = this.getData.bind(this);
     this.closeRequestForm = this.closeRequestForm.bind(this);
+    this.bindData = this.bindData.bind(this);
   }
   formStyles = {
     marginRight: 20,
@@ -35,22 +38,32 @@ class ListRequests extends Component {
       serviceResponse = response;
     });
     if (serviceResponse !== null && serviceResponse !== undefined) {
-      let requestsList = [];
-      serviceResponse.recordset.map(record => {
+      this.setState({ requestData: serviceResponse });
+      this.bindData();
+    }
+  }
+
+  bindData(e) {
+    let requestsList = [];
+    const s = this.search.current.value.toUpperCase();
+    this.state.requestData.recordset.map(record => {
+      if (record.SoftwareName.toUpperCase().includes(s)) {
         requestsList.push(
           <List.Item key={record.RequestID}>
             <List.Content>
               <List.Header as="a">{record.SoftwareName}</List.Header>
               <List.Description as="a">
-                <p>tags : {record.Tags}</p>
-                version : {record.Version}
+                <div>
+                  <p>tags : {record.Tags}</p>
+                  version : {record.Version}
+                </div>
               </List.Description>
             </List.Content>
           </List.Item>
         );
-      });
-      this.setState({ requests: requestsList });
-    }
+      }
+    });
+    this.setState({ requests: requestsList });
   }
 
   showRequestForm(id, e) {
@@ -73,6 +86,7 @@ class ListRequests extends Component {
             name="txtSearch"
             ref={this.search}
             placeholder="Search..."
+            onChange={this.bindData}
           />
           <Form.Button name="btnSearch" color="facebook" onClick={this.getData}>
             Search

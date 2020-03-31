@@ -18,13 +18,12 @@ class NewRequest extends Component {
   constructor(props) {
     super(props);
     this.requestId = props.requestId;
-    this.close = props.closeForm;
     this.state.softwareName = "";
     this.state.tags = "";
     this.state.downloadUrl = "";
     this.state.version = "";
     this.state.reason = "";
-    this.state.isFree = 1;
+    this.state.isFree = 0;
     this.state.teamLead = 0;
     this.handleChangeValue = this.handleChangeValue.bind(this);
     this.createNewRequest = this.createNewRequest.bind(this);
@@ -109,7 +108,9 @@ class NewRequest extends Component {
     if (this.validate(e)) {
       const res = Api.PostData("newRequest", this.buildData());
       alert("Request created successfully!");
-      this.props.closeForm();
+      if (this.props.closeForm !== null) {
+        this.props.closeForm();
+      }
     } else {
       //error;
       alert("Please resolve form errors");
@@ -243,6 +244,7 @@ class NewRequest extends Component {
             placeholder="Is Free"
             options={this.isFreeOptions}
             onChange={this.handleSelectionChange}
+            value={this.state.isFree}
           ></Select>
         </Form.Field>
         <Form.Field>
@@ -251,11 +253,17 @@ class NewRequest extends Component {
             placeholder="Team Lead"
             options={this.teamLeadOptions}
             onChange={this.handleSelectionChange}
+            value={this.state.teamLead}
           ></Select>
           <this.renderRequiredField name="teamLead"></this.renderRequiredField>
         </Form.Field>
         <Form.Field>
-          <Button name="btnCreateReq" positive onClick={this.createNewRequest}>
+          <Button
+            disabled={this.requestId === 0 ? false : true}
+            name="btnCreateReq"
+            positive
+            onClick={this.createNewRequest}
+          >
             Create Request
           </Button>
         </Form.Field>
