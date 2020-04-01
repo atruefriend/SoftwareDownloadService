@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Api from "../Api";
-import { Form, Input, Button, List, Modal } from "semantic-ui-react";
+import { Form, Input, Button, List, Modal, Icon } from "semantic-ui-react";
 import NewRequest from "./newRequest";
 
 class ListRequests extends Component {
@@ -56,6 +56,20 @@ class ListRequests extends Component {
                 <div>
                   <p>tags : {record.Tags}</p>
                   version : {record.Version}
+                </div>
+                <div>
+                  <Button
+                    color="orange"
+                    onClick={this.showRequestForm.bind(this, record.RequestID)}
+                  >
+                    View Details
+                  </Button>
+                  <Button
+                    disabled={record.State === 4 ? false : true}
+                    color="vk"
+                  >
+                    <Icon name="download" /> Download
+                  </Button>
                 </div>
               </List.Description>
             </List.Content>
