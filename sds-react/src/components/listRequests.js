@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import Api from "../Api";
 import { Form, Input, Button, List, Modal, Icon } from "semantic-ui-react";
 import NewRequest from "./newRequest";
+import username from "username";
+import dateFormat from "dateformat";
+import "../main.css";
 
 class ListRequests extends Component {
   state = {
@@ -29,6 +32,10 @@ class ListRequests extends Component {
     //debugger;
     //
     this.getData();
+    this.getUserName();
+  }
+  async getUserName() {
+    console.log(await username());
   }
   async getData(e) {
     let serviceResponse = null;
@@ -49,21 +56,31 @@ class ListRequests extends Component {
     this.state.requestData.recordset.map(record => {
       if (record.SoftwareName.toUpperCase().includes(s)) {
         requestsList.push(
-          <List.Item key={record.RequestID}>
+          <List.Item className="item" key={record.RequestID}>
             <List.Content>
-              <List.Header as="a">{record.SoftwareName}</List.Header>
-              <List.Description as="a">
+              <List.Header
+                onClick={this.showRequestForm.bind(this, record.RequestID)}
+                as="a"
+              >
+                {record.SoftwareName}
+              </List.Header>
+              <p>{record.Version}</p>
+              <List.Description as="div">
                 <div>
-                  <p>tags : {record.Tags}</p>
-                  version : {record.Version}
+                  <p>{record.Reason}</p>
                 </div>
                 <div>
-                  <Button
-                    color="orange"
-                    onClick={this.showRequestForm.bind(this, record.RequestID)}
-                  >
-                    View Details
-                  </Button>
+                  <ul className="subdown">
+                    <li className="left">
+                      {dateFormat(record.CreationDate, "mmm-ddS-yyyy")}
+                    </li>
+                    <li className="price">
+                      {record.FreePaid == 1 ? "Free" : "Paid"}
+                    </li>
+                    <li className="right">{record.Tags}</li>
+                  </ul>
+                </div>
+                <div>
                   <Button
                     disabled={record.State === 4 ? false : true}
                     color="vk"
@@ -92,15 +109,15 @@ class ListRequests extends Component {
   render() {
     return (
       <Form style={this.formStyles}>
-        <Form.Group widths="equal">
+        <Form.Group>
           <input
             type="text"
-            defaultValue=""
             fluid
             name="txtSearch"
             ref={this.search}
             placeholder="Search..."
             onChange={this.bindData}
+            className="search"
           />
           <Form.Button name="btnSearch" color="facebook" onClick={this.getData}>
             Search

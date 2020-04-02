@@ -1,0 +1,43 @@
+.subdown {
+  list-style-type: none;
+  font-size: 12px;
+  font-weight: 400;
+  color: #888;
+}
+ul {
+  list-style-image: none;
+  list-style-type: none;
+  font-size: 13px;
+  margin: 0;
+  padding-top: 10px !important;
+  padding: 0;
+}
+.subdown li.left {
+  padding-left: 0px;
+}
+.subdown li {
+  display: inline;
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: #bbb;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+ul li {
+  margin-bottom: 30px;
+  line-height: 22px;
+  list-style: none;
+}
+.price {
+  color: #3abd69;
+  position: relative;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.search {
+  width: 500px !important;
+  margin: 0px 8px 8px 0px !important;
+}
+.item {
+  margin-top: 5px;
+}

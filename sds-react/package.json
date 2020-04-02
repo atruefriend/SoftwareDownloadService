@@ -7,12 +7,14 @@
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
     "cors": "^2.8.5",
+    "dateformat": "^3.0.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.88.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "username": "^5.1.0"
   },
   "scripts": {
     "tsc": "tsc",
