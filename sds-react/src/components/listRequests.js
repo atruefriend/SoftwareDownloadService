@@ -23,11 +23,6 @@ class ListRequests extends Component {
     this.closeRequestForm = this.closeRequestForm.bind(this);
     this.bindData = this.bindData.bind(this);
   }
-  formStyles = {
-    marginRight: 20,
-    marginTop: 20,
-    marginLeft: 20
-  };
   componentDidMount() {
     //debugger;
     //
@@ -108,7 +103,7 @@ class ListRequests extends Component {
 
   render() {
     return (
-      <Form style={this.formStyles}>
+      <Form className="form">
         <Form.Group>
           <input
             type="text"
