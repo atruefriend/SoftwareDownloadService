@@ -1,6 +1,7 @@
 import express from "express";
 const bodyParser = require("body-parser");
 import db from "./db";
+import mdb from "./mongodb";
 const sql = require("mssql");
 const cors = require("cors");
 const app = express();
@@ -11,7 +12,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 
-app.get("/", function(req, res) {
+app.get("/", async function(req, res) {
+  const data = await mdb.getData("SoftwareRequests");
+  console.log("response: " + data);
   res.send("Get request executed successfully!");
 });
 

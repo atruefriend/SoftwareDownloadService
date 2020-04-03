@@ -35,57 +35,66 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var mssql_1 = __importDefault(require("mssql"));
-var config = {
-    user: "sa",
-    password: "nikhil",
-    server: "LAPTOP-83SSJD6E\\SQLEXPRESS",
-    database: "SDS",
-    options: {
-        instanceName: "SQLEXPRESS",
-        trustedConnection: true
-    }
-};
-function callStoredProcedure(procedureName, params) {
+var MongoClient = require("mongodb").MongoClient;
+var connString = "mongodb+srv://dbNikhil:pass123@nik-nsfuu.mongodb.net/test?retryWrites=true&w=majority";
+var dbName = "SoftwareDownloadServie";
+function initialize(collectionName) {
     return __awaiter(this, void 0, void 0, function () {
-        var pool, request_1, res, err_1;
+        var client, collection, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 4, , 5]);
-                    pool = new mssql_1.default.ConnectionPool(config);
-                    return [4 /*yield*/, pool.connect()];
+                    _a.trys.push([0, 3, , 4]);
+                    return [4 /*yield*/, MongoClient.connect(connString, {
+                            useNewUrlParser: true,
+                            useUnifiedTopology: true
+                        })];
                 case 1:
-                    _a.sent();
-                    return [4 /*yield*/, pool.request()];
+                    client = _a.sent();
+                    return [4 /*yield*/, client.db(dbName).collection(collectionName)];
                 case 2:
-                    request_1 = _a.sent();
-                    if (params != null) {
-                        params.map(function (param) {
-                            request_1.input(param["name"], param["type"], param["value"]);
-                        });
-                    }
-                    return [4 /*yield*/, request_1.execute(procedureName)];
+                    collection = _a.sent();
+                    console.log("[MongoDB connection] SUCCESS");
+                    // perform actions on the collection object
+                    //client.close();
+                    console.log("connection closed");
+                    return [2 /*return*/, collection];
                 case 3:
-                    res = _a.sent();
-                    //atlas
-                    //console.log(res);
-                    return [2 /*return*/, res];
-                case 4:
                     err_1 = _a.sent();
-                    console.log(err_1);
+                    console.log("[MongoDB connection] ERROR: " + err_1);
                     return [2 /*return*/, err_1];
-                case 5: return [2 /*return*/];
+                case 4: return [2 /*return*/];
             }
         });
     });
 }
-exports.dbMethods = {
-    callStoredProcedure: callStoredProcedure
+function getData(collectionName) {
+    return __awaiter(this, void 0, void 0, function () {
+        var dbCollection, result, err_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 3, , 4]);
+                    return [4 /*yield*/, initialize(collectionName)];
+                case 1:
+                    dbCollection = _a.sent();
+                    return [4 /*yield*/, dbCollection.find()];
+                case 2:
+                    result = _a.sent();
+                    dbCollection.client.close();
+                    return [2 /*return*/, JSON.stringify(result)];
+                case 3:
+                    err_2 = _a.sent();
+                    return [2 /*return*/, err_2];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.methods = {
+    initialize: initialize,
+    getData: getData
 };
-exports.default = exports.dbMethods;
-//# sourceMappingURL=db.js.map
+exports.default = exports.methods;
+//# sourceMappingURL=mongodb.js.map

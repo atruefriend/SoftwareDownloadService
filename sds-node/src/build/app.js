@@ -42,6 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var bodyParser = require("body-parser");
 var db_1 = __importDefault(require("./db"));
+var mongodb_1 = __importDefault(require("./mongodb"));
 var sql = require("mssql");
 var cors = require("cors");
 var app = express_1.default();
@@ -51,7 +52,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.get("/", function (req, res) {
-    res.send("Get request executed successfully!");
+    return __awaiter(this, void 0, void 0, function () {
+        var data;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, mongodb_1.default.getData("SoftwareRequests")];
+                case 1:
+                    data = _a.sent();
+                    console.log("response: " + data);
+                    res.send("Get request executed successfully!");
+                    return [2 /*return*/];
+            }
+        });
+    });
 });
 app.get("/getRequests", function (req, res) {
     return __awaiter(this, void 0, void 0, function () {
