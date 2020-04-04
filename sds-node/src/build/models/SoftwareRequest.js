@@ -35,66 +35,88 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
-var SoftwareRequest_1 = __importDefault(require("./models/SoftwareRequest"));
-var connString = "mongodb+srv://dbNikhil:pass123@nik-nsfuu.mongodb.net/SoftwareDownloadService?retryWrites=true&w=majority";
-var options = { useNewUrlParser: true, useUnifiedTopology: true };
-exports.connection = null;
-//Connect with mongodb. If already connected it will not try to connect again. But if recoonect is true it will forcefully connect.
-function connect(reconnect) {
-    if (reconnect === void 0) { reconnect = false; }
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!(!exports.connection || reconnect)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, mongoose.connect(connString, options, function (err, res) {
-                            if (err) {
-                                console.log("Not able to connect to database. Error : " + err);
-                            }
-                            else {
-                                console.log("Successfully connected with database.");
-                                exports.connection = mongoose.connection;
-                            }
-                        })];
-                case 1:
-                    _a.sent();
-                    return [3 /*break*/, 3];
-                case 2:
-                    console.log("You are already connected with database.");
-                    _a.label = 3;
-                case 3: return [2 /*return*/];
-            }
-        });
-    });
+var mongodb_1 = require("../mongodb");
+var collection = "softwarerequests";
+var model;
+var softwareRequestSchema = new mongoose.Schema({
+    UserID: { type: Number },
+    SoftwareName: { type: String, required: true },
+    Tags: { type: String },
+    DownloadUrl: { type: String },
+    Version: { type: String },
+    Reason: { type: String, required: true },
+    FreePaid: { type: Number },
+    TeamLead: { type: Number },
+    DownloadLocation: { type: String },
+    CreatedOn: { type: Date, default: Date.now },
+    RequestState: {
+        StateID: { type: Number },
+        ModifiedBy: { type: Number },
+        ModifiedDate: { type: Date, default: Date.now },
+        Comments: { type: String }
+    }
+});
+function constructModel() {
+    model = mongodb_1.connection.model(collection, softwareRequestSchema);
 }
 function createSoftwareRequest(params) {
     return __awaiter(this, void 0, void 0, function () {
+        var newRequest;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, SoftwareRequest_1.default.createSoftwareRequest(params)];
-                case 1: return [2 /*return*/, _a.sent()];
+            if (!model) {
+                constructModel();
             }
+            newRequest = new model({
+                UserID: params.userId,
+                SoftwareName: params.softwareName,
+                Tags: params.tags,
+                DownloadUrl: params.downloadUrl,
+                Version: params.version,
+                Reason: params.reason,
+                FreePaid: params.isFree,
+                TeamLead: params.teamLead,
+                RequestState: {
+                    StateID: 1,
+                    ModifiedBy: params.userId
+                }
+            });
+            newRequest.save();
+            return [2 /*return*/];
         });
     });
 }
 function fetchSoftwareRequests(id, softwareName) {
     return __awaiter(this, void 0, void 0, function () {
+        var query, response;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, SoftwareRequest_1.default.fetchSoftwareRequests(id, softwareName)];
-                case 1: return [2 /*return*/, _a.sent()];
+                case 0:
+                    if (!model) {
+                        constructModel();
+                    }
+                    if (id !== null && id !== undefined) {
+                        query = model.findById(id);
+                    }
+                    else if (softwareName !== null && softwareName !== undefined) {
+                        query = model.find({
+                            SoftwareName: { $regex: ".*" + softwareName + ".*", $options: "i" }
+                        });
+                    }
+                    else {
+                        query = model.find({});
+                    }
+                    return [4 /*yield*/, query.sort({ CreatedOn: "desc" }).exec()];
+                case 1:
+                    response = _a.sent();
+                    return [2 /*return*/, response];
             }
         });
     });
 }
 exports.default = {
-    connect: connect,
     createSoftwareRequest: createSoftwareRequest,
     fetchSoftwareRequests: fetchSoftwareRequests
 };
-//# sourceMappingURL=mongodb.js.map
+//# sourceMappingURL=SoftwareRequest.js.map

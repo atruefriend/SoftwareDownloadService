@@ -41,7 +41,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var bodyParser = require("body-parser");
-var db_1 = __importDefault(require("./db"));
 var mongodb_1 = __importDefault(require("./mongodb"));
 var sql = require("mssql");
 var cors = require("cors");
@@ -51,49 +50,44 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
+//middleware function: it will always fire before all requests
+var mongoConnection = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, mongodb_1.default.connect()];
+            case 1:
+                _a.sent();
+                next();
+                return [2 /*return*/];
+        }
+    });
+}); };
+app.use(mongoConnection);
 app.get("/", function (req, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var data;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, mongodb_1.default.getData("SoftwareRequests")];
-                case 1:
-                    data = _a.sent();
-                    console.log("response: " + data);
-                    res.send("Get request executed successfully!");
-                    return [2 /*return*/];
-            }
+            res.send("Get request executed successfully!");
+            return [2 /*return*/];
         });
     });
 });
 app.get("/getRequests", function (req, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var queryString, softwareName, requestId, params, data;
+        var queryString, softwareName, requestId;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     queryString = req.query;
                     softwareName = queryString.softwareName;
                     requestId = queryString.requestId;
-                    params = [];
-                    if (softwareName !== undefined) {
-                        params.push({
-                            name: "SoftwareName",
-                            value: softwareName,
-                            type: sql.VarChar(500)
-                        });
-                    }
-                    if (requestId !== undefined) {
-                        params.push({
-                            name: "RequestID",
-                            value: requestId,
-                            type: sql.Int
-                        });
-                    }
-                    return [4 /*yield*/, db_1.default.callStoredProcedure("GetRequets", params)];
+                    return [4 /*yield*/, mongodb_1.default
+                            .fetchSoftwareRequests(requestId, softwareName)
+                            .then(function (result) {
+                            res.send(result);
+                        })
+                            .catch(function (err) { return res.send(err); })];
                 case 1:
-                    data = _a.sent();
-                    res.send(data);
+                    _a.sent();
                     return [2 /*return*/];
             }
         });
@@ -116,20 +110,25 @@ app.post("/newRequest", function (req, res) {
                     isFree = req.body.isFree;
                     teamLead = req.body.teamLead;
                     userId = 1;
-                    params = [
-                        { name: "UserID", value: userId, type: sql.Int },
-                        { name: "SoftwareName", value: softwareName, type: sql.VarChar(500) },
-                        { name: "Tags", value: tags, type: sql.VarChar(500) },
-                        { name: "DownloadUrl", value: downloadUrl, type: sql.VarChar(500) },
-                        { name: "Version", value: version, type: sql.VarChar(200) },
-                        { name: "Reason", value: reason, type: sql.VarChar(1000) },
-                        { name: "FreePaid", value: isFree, type: sql.Int },
-                        { name: "TeamLead", value: teamLead, type: sql.Int }
-                    ];
-                    return [4 /*yield*/, db_1.default.callStoredProcedure("AddRequest", params)];
+                    params = {
+                        userId: userId,
+                        softwareName: softwareName,
+                        tags: tags,
+                        downloadUrl: downloadUrl,
+                        version: version,
+                        reason: reason,
+                        isFree: isFree,
+                        teamLead: teamLead
+                    };
+                    return [4 /*yield*/, mongodb_1.default.createSoftwareRequest(params)];
                 case 1:
                     result = _a.sent();
-                    res.send("Request created successfully!");
+                    if (result === null || result === undefined) {
+                        res.send("Request created successfully!");
+                    }
+                    else {
+                        res.send("Error occurred :" + result);
+                    }
                     return [2 /*return*/];
             }
         });

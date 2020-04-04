@@ -36,25 +36,29 @@ class ListRequests extends Component {
     let serviceResponse = null;
     const s = this.search.current.value;
     const params = [{ name: "softwareName", value: s }];
-    await Api.GetData("getRequests", params).then(response => {
-      serviceResponse = response;
-    });
-    if (serviceResponse !== null && serviceResponse !== undefined) {
-      this.setState({ requestData: serviceResponse });
-      this.bindData();
+    try {
+      await Api.GetData("getRequests", params).then(response => {
+        serviceResponse = response;
+      });
+      if (serviceResponse !== null && serviceResponse !== undefined) {
+        this.setState({ requestData: serviceResponse });
+        this.bindData();
+      }
+    } catch (err) {
+      console.log("Not able to connect service");
     }
   }
 
   bindData(e) {
     let requestsList = [];
     const s = this.search.current.value.toUpperCase();
-    this.state.requestData.recordset.map(record => {
+    this.state.requestData.map(record => {
       if (record.SoftwareName.toUpperCase().includes(s)) {
         requestsList.push(
-          <List.Item className="item" key={record.RequestID}>
+          <List.Item className="item" key={record._id}>
             <List.Content>
               <List.Header
-                onClick={this.showRequestForm.bind(this, record.RequestID)}
+                onClick={this.showRequestForm.bind(this, record._id)}
                 as="a"
               >
                 {record.SoftwareName}
@@ -77,7 +81,7 @@ class ListRequests extends Component {
                 </div>
                 <div>
                   <Button
-                    disabled={record.State === 4 ? false : true}
+                    disabled={record.RequestState.State === 4 ? false : true}
                     color="vk"
                   >
                     <Icon name="download" /> Download
@@ -103,7 +107,7 @@ class ListRequests extends Component {
 
   render() {
     return (
-      <Form className="form">
+      <Form className="customform">
         <Form.Group>
           <input
             type="text"

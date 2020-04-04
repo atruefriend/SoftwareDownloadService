@@ -1,17 +1,23 @@
 const server = "http://localhost:8080/";
 
-function PostData(method: String, data: any) {
+async function PostData(method: String, data: any) {
   const endpoint = server + method;
-  fetch(endpoint, {
+  const apiResponse = await fetch(endpoint, {
     method: "Post",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json"
     },
     body: data
-  }).then(res => {
-    return res.json();
-  });
+  })
+    .then(res => res.json())
+    .then(data => {
+      return data;
+    })
+    .catch(error => {
+      return error;
+    });
+  return apiResponse;
 }
 
 async function GetData(

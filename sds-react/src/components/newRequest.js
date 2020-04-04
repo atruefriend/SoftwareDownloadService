@@ -23,8 +23,8 @@ class NewRequest extends Component {
     this.state.downloadUrl = "";
     this.state.version = "";
     this.state.reason = "";
-    this.state.isFree = 0;
-    this.state.teamLead = 0;
+    this.state.isFree = -1;
+    this.state.teamLead = -1;
     this.handleChangeValue = this.handleChangeValue.bind(this);
     this.createNewRequest = this.createNewRequest.bind(this);
     this.renderRequiredField = this.renderRequiredField.bind(this);
@@ -38,11 +38,13 @@ class NewRequest extends Component {
   };
 
   isFreeOptions = [
+    { key: -1, text: "Free/Paid", value: -1 },
     { key: 1, text: "Free", value: 1 },
     { key: 2, text: "Paid", value: 2 }
   ];
 
   teamLeadOptions = [
+    { key: -1, text: "Team Lead", value: -1 },
     { key: 1, text: "Anil Kumar Modest", value: 1 },
     { key: 2, text: "Gaurav Sharma", value: 2 },
     { key: 3, text: "Ankit Kumar Garg", value: 3 }
@@ -70,7 +72,7 @@ class NewRequest extends Component {
         return null;
       }
     } else if (props.name === "teamLead") {
-      if (this.state.teamLead === 0) {
+      if (this.state.teamLead === -1) {
         return (
           <Label basic color="red" pointing>
             Please select your team lead.
@@ -88,7 +90,7 @@ class NewRequest extends Component {
       const params = [{ name: "requestId", value: this.requestId }];
       const serviceResponse = await Api.GetData("getRequests", params);
       if (serviceResponse !== null && serviceResponse !== undefined) {
-        const requestData = serviceResponse.recordset[0];
+        const requestData = serviceResponse;
         this.updateState("txtSoftwareName", requestData.SoftwareName);
         this.updateState("txtTags", requestData.Tags);
         this.updateState("txtDownloadUrl", requestData.DownloadUrl);
@@ -104,9 +106,9 @@ class NewRequest extends Component {
     this.getRequestForRequestId();
   }
 
-  createNewRequest(e) {
+  async createNewRequest(e) {
     if (this.validate(e)) {
-      const res = Api.PostData("newRequest", this.buildData());
+      const res = await Api.PostData("newRequest", this.buildData());
       alert("Request created successfully!");
       if (this.props.closeForm !== null) {
         this.props.closeForm();
@@ -134,7 +136,7 @@ class NewRequest extends Component {
     if (
       this.state.softwareName === "" ||
       this.state.reason === "" ||
-      this.state.teamLead === 0
+      this.state.teamLead === -1
     ) {
       return false;
     }

@@ -41,6 +41,12 @@ ul li {
 .item {
   margin-top: 5px;
 }
-.form {
+.customform {
   margin: 20px 20px 0 20px;
+}
+
+.center {
+  width: 100%;
+  float: left;
+  text-align: center;
 }

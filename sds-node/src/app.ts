@@ -12,9 +12,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 
+//middleware function: it will always fire before all requests
+const mongoConnection = async (req: any, res: any, next: () => void) => {
+  await mdb.connect();
+  next();
+};
+app.use(mongoConnection);
+
 app.get("/", async function(req, res) {
-  const data = await mdb.getData("SoftwareRequests");
-  console.log("response: " + data);
   res.send("Get request executed successfully!");
 });
 
@@ -23,23 +28,12 @@ app.get("/getRequests", async function(req, res) {
   const softwareName = queryString.softwareName;
   const requestId = queryString.requestId;
 
-  const params = [];
-  if (softwareName !== undefined) {
-    params.push({
-      name: "SoftwareName",
-      value: softwareName,
-      type: sql.VarChar(500)
-    });
-  }
-  if (requestId !== undefined) {
-    params.push({
-      name: "RequestID",
-      value: requestId,
-      type: sql.Int
-    });
-  }
-  const data = await db.callStoredProcedure("GetRequets", params);
-  res.send(data);
+  await mdb
+    .fetchSoftwareRequests(requestId, softwareName)
+    .then(result => {
+      res.send(result);
+    })
+    .catch(err => res.send(err));
 });
 
 app.post("/", function(req, res, next) {
@@ -56,20 +50,24 @@ app.post("/newRequest", async function(req, res) {
   const teamLead = req.body.teamLead;
   const userId = 1;
 
-  const params = [
-    { name: "UserID", value: userId, type: sql.Int },
-    { name: "SoftwareName", value: softwareName, type: sql.VarChar(500) },
-    { name: "Tags", value: tags, type: sql.VarChar(500) },
-    { name: "DownloadUrl", value: downloadUrl, type: sql.VarChar(500) },
-    { name: "Version", value: version, type: sql.VarChar(200) },
-    { name: "Reason", value: reason, type: sql.VarChar(1000) },
-    { name: "FreePaid", value: isFree, type: sql.Int },
-    { name: "TeamLead", value: teamLead, type: sql.Int }
-  ];
+  const params = {
+    userId: userId,
+    softwareName: softwareName,
+    tags: tags,
+    downloadUrl: downloadUrl,
+    version: version,
+    reason: reason,
+    isFree: isFree,
+    teamLead: teamLead
+  };
 
-  const result = await db.callStoredProcedure("AddRequest", params);
+  let result = await mdb.createSoftwareRequest(params);
 
-  res.send("Request created successfully!");
+  if (result === null || result === undefined) {
+    res.send("Request created successfully!");
+  } else {
+    res.send("Error occurred :" + result);
+  }
 });
 
 app.listen(port, function(err) {

@@ -1,46 +1,37 @@
-const MongoClient = require("mongodb").MongoClient;
+const mongoose = require("mongoose");
+import softwareRequest from "./models/SoftwareRequest";
+import SoftwareRequest from "./models/SoftwareRequest";
 const connString =
-  "mongodb+srv://dbNikhil:pass123@nik-nsfuu.mongodb.net/test?retryWrites=true&w=majority";
-const dbName = "SoftwareDownloadServie";
+  "mongodb+srv://dbNikhil:pass123@nik-nsfuu.mongodb.net/SoftwareDownloadService?retryWrites=true&w=majority";
+const options = { useNewUrlParser: true, useUnifiedTopology: true };
+export let connection: any = null;
 
-async function initialize(collectionName: string) {
-  try {
-    // const client = new MongoClient(connString, {
-    //   useNewUrlParser: true,
-    //   useUnifiedTopology: true
-    // });
-    const client = await MongoClient.connect(connString, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
+//Connect with mongodb. If already connected it will not try to connect again. But if recoonect is true it will forcefully connect.
+async function connect(reconnect: boolean = false) {
+  if (!connection || reconnect) {
+    await mongoose.connect(connString, options, (err: object, res: object) => {
+      if (err) {
+        console.log("Not able to connect to database. Error : " + err);
+      } else {
+        console.log("Successfully connected with database.");
+        connection = mongoose.connection;
+      }
     });
-
-    const collection = await client.db(dbName).collection(collectionName);
-    console.log("[MongoDB connection] SUCCESS");
-
-    // perform actions on the collection object
-    //client.close();
-    console.log("connection closed");
-    return collection;
-  } catch (err) {
-    console.log("[MongoDB connection] ERROR: " + err);
-    return err;
+  } else {
+    console.log("You are already connected with database.");
   }
 }
 
-async function getData(collectionName: string) {
-  try {
-    const dbCollection = await initialize(collectionName);
-    const result = await dbCollection.find();
-    dbCollection.client.close();
-    return JSON.stringify(result);
-  } catch (err) {
-    return err;
-  }
+async function createSoftwareRequest(params: any) {
+  return await SoftwareRequest.createSoftwareRequest(params);
 }
 
-export const methods = {
-  initialize,
-  getData
+async function fetchSoftwareRequests(id: any, softwareName: string) {
+  return await SoftwareRequest.fetchSoftwareRequests(id, softwareName);
+}
+
+export default {
+  connect,
+  createSoftwareRequest,
+  fetchSoftwareRequests
 };
-
-export default methods;
