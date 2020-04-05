@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 import mdb, { connection } from "../mongodb";
+import requestStateLog from "./RequestStateLog";
 const collection = "softwarerequests";
 let model: any;
 
@@ -20,6 +21,11 @@ const softwareRequestSchema = new mongoose.Schema({
     ModifiedDate: { type: Date, default: Date.now },
     Comments: { type: String }
   }
+});
+
+//Middleware function: it will always execute post saving, you can also use pre. Always register this before initializing model to work.
+softwareRequestSchema.post("save", (data: any) => {
+  requestStateLog.createRequestStateLog(data);
 });
 
 function constructModel() {
