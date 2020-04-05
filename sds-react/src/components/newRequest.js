@@ -18,6 +18,7 @@ class NewRequest extends Component {
   constructor(props) {
     super(props);
     this.requestId = props.requestId;
+    this.requestState = props.requestState;
     this.state.softwareName = "";
     this.state.tags = "";
     this.state.downloadUrl = "";
@@ -89,8 +90,10 @@ class NewRequest extends Component {
     if (this.requestId !== 0) {
       const params = [{ name: "requestId", value: this.requestId }];
       const serviceResponse = await Api.GetData("getRequests", params);
+      let reqState = 0;
       if (serviceResponse !== null && serviceResponse !== undefined) {
         const requestData = serviceResponse;
+        reqState = requestData.RequestState.StateID;
         this.updateState("txtSoftwareName", requestData.SoftwareName);
         this.updateState("txtTags", requestData.Tags);
         this.updateState("txtDownloadUrl", requestData.DownloadUrl);
@@ -100,6 +103,8 @@ class NewRequest extends Component {
         this.updateState("cmbTeamLead", requestData.TeamLead);
       }
     }
+    //if requestState is 1 team lead approval, 2 approved by TL & waiting NSD, 3 rejected, 4 completed
+    //compare the requestState && reqState; if requestState < reqState then request already processed.
   }
 
   componentDidMount() {

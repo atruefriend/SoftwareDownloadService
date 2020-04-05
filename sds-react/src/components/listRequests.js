@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import Api from "../Api";
 import { Form, Input, Button, List, Modal, Icon } from "semantic-ui-react";
 import NewRequest from "./newRequest";
-import username from "username";
 import dateFormat from "dateformat";
 import "../main.css";
 
@@ -11,27 +10,38 @@ class ListRequests extends Component {
     requests: [],
     requestData: {},
     showRequest: false,
-    requestId: 0
+    requestId: 0,
+    requestState: 0
   };
   constructor(props) {
     super(props);
     this.state.requestData = {};
     this.showRequest = false;
     this.requestId = 0;
+    this.requestState = 0;
     this.search = React.createRef();
     this.getData = this.getData.bind(this);
     this.closeRequestForm = this.closeRequestForm.bind(this);
     this.bindData = this.bindData.bind(this);
+    this.processRequest = this.processRequest.bind(this);
   }
+
   componentDidMount() {
     //debugger;
-    //
     this.getData();
-    this.getUserName();
+    this.processRequest();
   }
-  async getUserName() {
-    console.log(await username());
+
+  processRequest() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams !== "" && urlParams !== null && urlParams !== undefined) {
+      const requestId = urlParams.get("requestId");
+      const stateId = urlParams.get("stateId");
+      console.log(requestId + "  " + stateId);
+      this.showRequestForm(requestId, stateId);
+    }
   }
+
   async getData(e) {
     let serviceResponse = null;
     const s = this.search.current.value;
@@ -58,7 +68,7 @@ class ListRequests extends Component {
           <List.Item className="item" key={record._id}>
             <List.Content>
               <List.Header
-                onClick={this.showRequestForm.bind(this, record._id)}
+                onClick={this.showRequestForm.bind(this, record._id, 0)}
                 as="a"
               >
                 {record.SoftwareName}
@@ -96,8 +106,9 @@ class ListRequests extends Component {
     this.setState({ requests: requestsList });
   }
 
-  showRequestForm(id, e) {
+  showRequestForm(id, requestState, e) {
     this.setState({ requestId: id });
+    this.setState({ requestState: requestState });
     this.setState({ showRequest: true });
   }
 
@@ -123,7 +134,7 @@ class ListRequests extends Component {
           </Form.Button>
           <Form.Button
             name="btnNewRequest"
-            onClick={this.showRequestForm.bind(this, 0)}
+            onClick={this.showRequestForm.bind(this, 0, 0)}
             positive
           >
             New Request
@@ -136,6 +147,7 @@ class ListRequests extends Component {
             <Modal.Content>
               <NewRequest
                 requestId={this.state.requestId}
+                requestState={this.state.requestState}
                 closeForm={this.closeRequestForm}
               ></NewRequest>
             </Modal.Content>
