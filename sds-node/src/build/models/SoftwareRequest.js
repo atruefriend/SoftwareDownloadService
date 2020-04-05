@@ -62,6 +62,7 @@ var softwareRequestSchema = new mongoose.Schema({
         Comments: { type: String }
     }
 });
+//Middleware function: it will always execute post saving, you can also use pre. Always register this before initializing model to work.
 softwareRequestSchema.post("save", function (data) {
     RequestStateLog_1.default.createRequestStateLog(data);
 });

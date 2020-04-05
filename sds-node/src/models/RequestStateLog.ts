@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 import { connection } from "../mongodb";
+import mail from "../mail";
 const collection = "requeststatelog";
 let model: any;
 
@@ -15,7 +16,7 @@ function constructModel() {
   model = connection.model(collection, RequestStateLogSchema);
 }
 
-function createRequestStateLog(params: any) {
+async function createRequestStateLog(params: any) {
   if (!model) {
     constructModel();
   }
@@ -26,6 +27,10 @@ function createRequestStateLog(params: any) {
     ModifiedBy: params.RequestState.ModifiedBy,
     ModifiedDate: params.RequestState.ModifiedDate
   });
+
+  await mail
+    .sendMail(params)
+    .catch(err => console.log("Error occured in sending mail :" + err));
 
   log.save();
 }

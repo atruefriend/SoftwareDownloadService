@@ -35,52 +35,47 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var mongoose = require("mongoose");
-var mongodb_1 = require("../mongodb");
-var mail_1 = __importDefault(require("../mail"));
-var collection = "requeststatelog";
-var model;
-var RequestStateLogSchema = new mongoose.Schema({
-    RequestID: { type: String },
-    StateID: { type: Number },
-    ModifiedBy: { type: Number },
-    ModifiedDate: { type: Date, default: Date.now },
-    Comments: { type: String }
-});
-function constructModel() {
-    model = mongodb_1.connection.model(collection, RequestStateLogSchema);
-}
-function createRequestStateLog(params) {
+var nodemailer = require("nodemailer");
+function sendMail(params) {
     return __awaiter(this, void 0, void 0, function () {
-        var log;
+        var testAccount, transporter, info;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    if (!model) {
-                        constructModel();
-                    }
-                    log = new model({
-                        RequestID: params._id,
-                        StateID: params.RequestState.StateID,
-                        ModifiedBy: params.RequestState.ModifiedBy,
-                        ModifiedDate: params.RequestState.ModifiedDate
-                    });
-                    return [4 /*yield*/, mail_1.default
-                            .sendMail(params)
-                            .catch(function (err) { return console.log("Error occured in sending mail :" + err); })];
+                case 0: return [4 /*yield*/, nodemailer.createTestAccount()];
                 case 1:
-                    _a.sent();
-                    log.save();
+                    testAccount = _a.sent();
+                    transporter = nodemailer.createTransport({
+                        host: "smtp.ethereal.email",
+                        port: 587,
+                        secure: false,
+                        auth: {
+                            user: testAccount.user,
+                            pass: testAccount.pass // generated ethereal password
+                        }
+                    });
+                    return [4 /*yield*/, transporter.sendMail({
+                            from: testAccount.user,
+                            to: "nikhil01@icloud.com",
+                            subject: "New Request created",
+                            text: "Body Test",
+                            html: "<b>Please approve the request <a href='http://localhost:3000?requestId=" +
+                                params._id +
+                                "'>" +
+                                params.SoftwareName +
+                                "</a></b>" // html body
+                        })];
+                case 2:
+                    info = _a.sent();
+                    console.log(info);
+                    // Preview only available when sending through an Ethereal account
+                    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
                     return [2 /*return*/];
             }
         });
     });
 }
 exports.default = {
-    createRequestStateLog: createRequestStateLog
+    sendMail: sendMail
 };
-//# sourceMappingURL=RequestStateLog.js.map
+//# sourceMappingURL=mail.js.map
