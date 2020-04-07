@@ -10,7 +10,7 @@ import {
   Button,
   TextArea,
   Modal,
-  Header
+  Header,
 } from "semantic-ui-react";
 
 class NewRequest extends Component {
@@ -24,8 +24,9 @@ class NewRequest extends Component {
     this.state.downloadUrl = "";
     this.state.version = "";
     this.state.reason = "";
-    this.state.isFree = -1;
-    this.state.teamLead = -1;
+    this.state.isFree = "";
+    this.state.teamLead = "";
+    this.state.hideBtnCreateRequest = "hide";
     this.handleChangeValue = this.handleChangeValue.bind(this);
     this.createNewRequest = this.createNewRequest.bind(this);
     this.renderRequiredField = this.renderRequiredField.bind(this);
@@ -35,20 +36,18 @@ class NewRequest extends Component {
   formStyles = {
     marginRight: 20,
     marginTop: 20,
-    marginLeft: 20
+    marginLeft: 20,
   };
 
   isFreeOptions = [
-    { key: -1, text: "Free/Paid", value: -1 },
     { key: 1, text: "Free", value: 1 },
-    { key: 2, text: "Paid", value: 2 }
+    { key: 2, text: "Paid", value: 2 },
   ];
 
   teamLeadOptions = [
-    { key: -1, text: "Team Lead", value: -1 },
     { key: 1, text: "Anil Kumar Modest", value: 1 },
     { key: 2, text: "Gaurav Sharma", value: 2 },
-    { key: 3, text: "Ankit Kumar Garg", value: 3 }
+    { key: 3, text: "Ankit Kumar Garg", value: 3 },
   ];
 
   renderRequiredField(props) {
@@ -73,7 +72,7 @@ class NewRequest extends Component {
         return null;
       }
     } else if (props.name === "teamLead") {
-      if (this.state.teamLead === -1) {
+      if (this.state.teamLead === "") {
         return (
           <Label basic color="red" pointing>
             Please select your team lead.
@@ -132,7 +131,7 @@ class NewRequest extends Component {
       version: this.state.version,
       reason: this.state.reason,
       isFree: this.state.isFree,
-      teamLead: this.state.teamLead
+      teamLead: this.state.teamLead,
     };
     return JSON.stringify(data);
   }
@@ -141,7 +140,7 @@ class NewRequest extends Component {
     if (
       this.state.softwareName === "" ||
       this.state.reason === "" ||
-      this.state.teamLead === -1
+      this.state.teamLead === ""
     ) {
       return false;
     }
@@ -248,7 +247,7 @@ class NewRequest extends Component {
         <Form.Field>
           <Select
             name="cmbIsFree"
-            placeholder="Is Free"
+            placeholder="Free/Paid"
             options={this.isFreeOptions}
             onChange={this.handleSelectionChange}
             value={this.state.isFree}
@@ -264,7 +263,7 @@ class NewRequest extends Component {
           ></Select>
           <this.renderRequiredField name="teamLead"></this.renderRequiredField>
         </Form.Field>
-        <Form.Field>
+        <Form.Field className={this.state.hideBtnCreateRequest}>
           <Button
             disabled={this.requestId === 0 ? false : true}
             name="btnCreateReq"

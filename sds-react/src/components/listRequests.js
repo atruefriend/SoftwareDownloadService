@@ -11,7 +11,7 @@ class ListRequests extends Component {
     requestData: {},
     showRequest: false,
     requestId: 0,
-    requestState: 0
+    requestState: 0,
   };
   constructor(props) {
     super(props);
@@ -38,7 +38,9 @@ class ListRequests extends Component {
       const requestId = urlParams.get("requestId");
       const stateId = urlParams.get("stateId");
       console.log(requestId + "  " + stateId);
-      this.showRequestForm(requestId, stateId);
+      if (requestId !== null) {
+        this.showRequestForm(requestId, stateId);
+      }
     }
   }
 
@@ -47,7 +49,7 @@ class ListRequests extends Component {
     const s = this.search.current.value;
     const params = [{ name: "softwareName", value: s }];
     try {
-      await Api.GetData("getRequests", params).then(response => {
+      await Api.GetData("getRequests", params).then((response) => {
         serviceResponse = response;
       });
       if (serviceResponse !== null && serviceResponse !== undefined) {
@@ -62,7 +64,7 @@ class ListRequests extends Component {
   bindData(e) {
     let requestsList = [];
     const s = this.search.current.value.toUpperCase();
-    this.state.requestData.map(record => {
+    this.state.requestData.map((record) => {
       if (record.SoftwareName.toUpperCase().includes(s)) {
         requestsList.push(
           <List.Item className="item" key={record._id}>
@@ -122,7 +124,6 @@ class ListRequests extends Component {
         <Form.Group>
           <input
             type="text"
-            fluid
             name="txtSearch"
             ref={this.search}
             placeholder="Search..."

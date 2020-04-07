@@ -50,3 +50,11 @@ ul li {
   float: left;
   text-align: center;
 }
+
+.hide {
+  display: none !important;
+}
+
+.show {
+  display: inline !important;
+}

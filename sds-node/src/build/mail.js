@@ -61,6 +61,8 @@ function sendMail(params) {
                             text: "Body Test",
                             html: "<b>Please approve the request <a href='http://localhost:3000?requestId=" +
                                 params._id +
+                                "&stateId=" +
+                                params.RequestState.StateId +
                                 "'>" +
                                 params.SoftwareName +
                                 "</a></b>" // html body
