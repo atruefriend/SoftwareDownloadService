@@ -59,8 +59,8 @@ var softwareRequestSchema = new mongoose.Schema({
         StateID: { type: Number },
         ModifiedBy: { type: Number },
         ModifiedDate: { type: Date, default: Date.now },
-        Comments: { type: String }
-    }
+        Comments: { type: String },
+    },
 });
 //Middleware function: it will always execute post saving, you can also use pre. Always register this before initializing model to work.
 softwareRequestSchema.post("save", function (data) {
@@ -87,8 +87,8 @@ function createSoftwareRequest(params) {
                 TeamLead: params.teamLead,
                 RequestState: {
                     StateID: 1,
-                    ModifiedBy: params.userId
-                }
+                    ModifiedBy: params.userId,
+                },
             });
             newRequest.save();
             return [2 /*return*/];
@@ -109,7 +109,7 @@ function fetchSoftwareRequests(id, softwareName) {
                     }
                     else if (softwareName !== null && softwareName !== undefined) {
                         query = model.find({
-                            SoftwareName: { $regex: ".*" + softwareName + ".*", $options: "i" }
+                            SoftwareName: { $regex: ".*" + softwareName + ".*", $options: "i" },
                         });
                     }
                     else {
@@ -123,8 +123,41 @@ function fetchSoftwareRequests(id, softwareName) {
         });
     });
 }
+function approveRequest(params) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            if (!model) {
+                constructModel();
+            }
+            model.findById(params.requestId, function (err, request) {
+                if (!err) {
+                    request.DownloadLocation = params.downloadLocation;
+                    request.RequestState = {
+                        StateID: params.stateId,
+                        Comments: params.comments,
+                        ModifiedBy: params.userId,
+                    };
+                    request.save();
+                }
+                else {
+                    console.log("Error occurred : " + err);
+                }
+            });
+            model.updateOne({ _id: params.requestId }, {
+                DownloadLocation: params.downloadLocation,
+                RequestState: {
+                    StateID: params.stateId,
+                    Comments: params.comments,
+                    ModifiedBy: params.userId,
+                },
+            });
+            return [2 /*return*/];
+        });
+    });
+}
 exports.default = {
     createSoftwareRequest: createSoftwareRequest,
-    fetchSoftwareRequests: fetchSoftwareRequests
+    fetchSoftwareRequests: fetchSoftwareRequests,
+    approveRequest: approveRequest,
 };
 //# sourceMappingURL=SoftwareRequest.js.map

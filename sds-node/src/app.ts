@@ -19,28 +19,28 @@ const mongoConnection = async (req: any, res: any, next: () => void) => {
 };
 app.use(mongoConnection);
 
-app.get("/", async function(req, res) {
+app.get("/", async function (req, res) {
   res.send("Get request executed successfully!");
 });
 
-app.get("/getRequests", async function(req, res) {
+app.get("/getRequests", async function (req, res) {
   const queryString = req.query;
   const softwareName = queryString.softwareName;
   const requestId = queryString.requestId;
 
   await mdb
     .fetchSoftwareRequests(requestId, softwareName)
-    .then(result => {
+    .then((result) => {
       res.send(result);
     })
-    .catch(err => res.send(err));
+    .catch((err) => res.send(err));
 });
 
-app.post("/", function(req, res, next) {
+app.post("/", function (req, res, next) {
   res.send("Post request executed successfully!");
 });
 
-app.post("/newRequest", async function(req, res) {
+app.post("/newRequest", async function (req, res) {
   const softwareName = req.body.softwareName;
   const tags = req.body.tags;
   const downloadUrl = req.body.downloadUrl;
@@ -58,7 +58,7 @@ app.post("/newRequest", async function(req, res) {
     version: version,
     reason: reason,
     isFree: isFree,
-    teamLead: teamLead
+    teamLead: teamLead,
   };
 
   let result = await mdb.createSoftwareRequest(params);
@@ -70,7 +70,31 @@ app.post("/newRequest", async function(req, res) {
   }
 });
 
-app.listen(port, function(err) {
+app.post("/approveRequest", async function (req, res) {
+  const requestId = req.body.requestId;
+  const comments = req.body.comments;
+  const downloadLocation = req.body.downloadLocation;
+  const stateId = req.body.stateId;
+  const userId = 1;
+
+  const params = {
+    userId: userId,
+    requestId: requestId,
+    comments: comments,
+    downloadLocation: downloadLocation,
+    stateId: stateId,
+  };
+
+  let result = await mdb.approveRequest(params);
+
+  if (result === null || result === undefined) {
+    res.send("Request approved successfully!");
+  } else {
+    res.send("Error occurred :" + result);
+  }
+});
+
+app.listen(port, function (err) {
   if (err) {
     return console.log(err);
   }

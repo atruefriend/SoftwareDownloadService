@@ -58,3 +58,7 @@ ul li {
 .show {
   display: inline !important;
 }
+
+.main {
+  background: #f7f7f7 !important;
+}

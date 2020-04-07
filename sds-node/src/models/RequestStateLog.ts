@@ -9,7 +9,7 @@ const RequestStateLogSchema = new mongoose.Schema({
   StateID: { type: Number },
   ModifiedBy: { type: Number },
   ModifiedDate: { type: Date, default: Date.now },
-  Comments: { type: String }
+  Comments: { type: String },
 });
 
 function constructModel() {
@@ -25,16 +25,17 @@ async function createRequestStateLog(params: any) {
     RequestID: params._id,
     StateID: params.RequestState.StateID,
     ModifiedBy: params.RequestState.ModifiedBy,
-    ModifiedDate: params.RequestState.ModifiedDate
+    ModifiedDate: params.RequestState.ModifiedDate,
+    Comments: params.RequestState.Comments,
   });
 
   await mail
     .sendMail(params)
-    .catch(err => console.log("Error occured in sending mail :" + err));
+    .catch((err) => console.log("Error occured in sending mail :" + err));
 
   log.save();
 }
 
 export default {
-  createRequestStateLog
+  createRequestStateLog,
 };

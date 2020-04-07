@@ -18,7 +18,7 @@ class NewRequest extends Component {
   constructor(props) {
     super(props);
     this.requestId = props.requestId;
-    this.requestState = props.requestState;
+    this.requestState = Number(props.requestState);
     this.state.softwareName = "";
     this.state.tags = "";
     this.state.downloadUrl = "";
@@ -26,7 +26,12 @@ class NewRequest extends Component {
     this.state.reason = "";
     this.state.isFree = "";
     this.state.teamLead = "";
-    this.state.hideBtnCreateRequest = "hide";
+    this.state.downloadLocation = "";
+    this.state.comments = "";
+    this.state.hideBtnCreateRequest = "show";
+    this.state.hideComments = "hide";
+    this.state.hideDownloadLocation = "hide";
+    this.state.hideBtnApprove = "hide";
     this.handleChangeValue = this.handleChangeValue.bind(this);
     this.createNewRequest = this.createNewRequest.bind(this);
     this.renderRequiredField = this.renderRequiredField.bind(this);
@@ -86,24 +91,52 @@ class NewRequest extends Component {
   }
 
   async getRequestForRequestId(e) {
-    if (this.requestId !== 0) {
-      const params = [{ name: "requestId", value: this.requestId }];
-      const serviceResponse = await Api.GetData("getRequests", params);
-      let reqState = 0;
-      if (serviceResponse !== null && serviceResponse !== undefined) {
-        const requestData = serviceResponse;
-        reqState = requestData.RequestState.StateID;
-        this.updateState("txtSoftwareName", requestData.SoftwareName);
-        this.updateState("txtTags", requestData.Tags);
-        this.updateState("txtDownloadUrl", requestData.DownloadUrl);
-        this.updateState("txtVersion", requestData.Version);
-        this.updateState("txtReason", requestData.Reason);
-        this.updateState("cmbIsFree", requestData.FreePaid);
-        this.updateState("cmbTeamLead", requestData.TeamLead);
+    try {
+      if (this.requestId !== 0) {
+        const params = [{ name: "requestId", value: this.requestId }];
+        const serviceResponse = await Api.GetData("getRequests", params);
+        let reqState = 0;
+        if (serviceResponse !== null && serviceResponse !== undefined) {
+          const requestData = serviceResponse;
+          reqState = requestData.RequestState.StateID;
+          this.updateState("txtSoftwareName", requestData.SoftwareName);
+          this.updateState("txtTags", requestData.Tags);
+          this.updateState("txtDownloadUrl", requestData.DownloadUrl);
+          this.updateState("txtVersion", requestData.Version);
+          this.updateState("txtReason", requestData.Reason);
+          this.updateState("cmbIsFree", requestData.FreePaid);
+          this.updateState("cmbTeamLead", requestData.TeamLead);
+        }
+        this.setState({ hideBtnCreateRequest: "hide" });
+        this.setState({ hideDownloadLocation: "hide" });
+        this.setState({ hideComments: "hide" });
+        this.setState({ hideBtnApprove: "hide" });
+        if (this.requestState >= reqState) {
+          if (this.requestState == 1) {
+            this.setState({ hideBtnCreateRequest: "hide" });
+            this.setState({ hideDownloadLocation: "hide" });
+            this.setState({ hideComments: "show" });
+            this.setState({ hideBtnApprove: "show" });
+          } else if (this.requestState == 2) {
+            this.setState({ hideBtnCreateRequest: "hide" });
+            this.setState({ hideDownloadLocation: "show" });
+            this.setState({ hideComments: "show" });
+            this.setState({ hideBtnApprove: "show" });
+          } else if (
+            this.requestState == 3 ||
+            this.requestState == 4 ||
+            this.requestState == 5
+          ) {
+            this.setState({ hideBtnCreateRequest: "hide" });
+            this.setState({ hideDownloadLocation: "show" });
+            this.setState({ hideComments: "show" });
+            this.setState({ hideBtnApprove: "hide" });
+          }
+        }
       }
+    } catch (err) {
+      console.log(err);
     }
-    //if requestState is 1 team lead approval, 2 approved by TL & waiting NSD, 3 rejected, 4 completed
-    //compare the requestState && reqState; if requestState < reqState then request already processed.
   }
 
   componentDidMount() {
@@ -120,6 +153,44 @@ class NewRequest extends Component {
     } else {
       //error;
       alert("Please resolve form errors");
+    }
+  }
+
+  async approveRequest(isApprove, e) {
+    if (this.requestId !== 0) {
+      try {
+        let stateId = this.requestState;
+        if (isApprove) {
+          if (this.requestState === 1) {
+            stateId = 2;
+          } else if (this.requestState === 2) {
+            stateId = 4;
+          }
+        } else {
+          if (this.requestState === 1) {
+            stateId = 3;
+          } else if (this.requestState === 2) {
+            stateId = 5;
+          }
+        }
+        const params = {
+          requestId: this.requestId,
+          comments: this.state.comments,
+          downloadLocation: this.state.downloadLocation,
+          stateId: stateId,
+        };
+
+        const res = await Api.PostData(
+          "approveRequest",
+          JSON.stringify(params)
+        );
+        alert("Request " + (isApprove ? "Approved!" : "Rejected!"));
+        if (this.props.closeForm !== null) {
+          this.props.closeForm();
+        }
+      } catch (err) {
+        console.log("Error occurred " + err);
+      }
     }
   }
 
@@ -184,6 +255,12 @@ class NewRequest extends Component {
       case "cmbTeamLead":
         this.setState({ teamLead: value });
         break;
+      case "txtComments":
+        this.setState({ comments: value });
+        break;
+      case "txtDlownloadLocation":
+        this.setState({ downloadLocation: value });
+        break;
       default:
         break;
     }
@@ -191,89 +268,131 @@ class NewRequest extends Component {
 
   render() {
     return (
-      <Form style={this.formStyles}>
-        <Form.Field>
-          <label>Software Name</label>
-          <input
-            name="txtSoftwareName"
-            type="text"
-            placeholder="Python"
-            value={this.state.softwareName}
-            onChange={this.handleChangeValue}
-          ></input>
-          <this.renderRequiredField name="softwareName"></this.renderRequiredField>
-        </Form.Field>
-        <Form.Field>
-          <label>Tags</label>
-          <input
-            name="txtTags"
-            type="text"
-            placeholder="scripting, formula"
-            value={this.state.tags}
-            onChange={this.handleChangeValue}
-          ></input>
-        </Form.Field>
-        <Form.Field>
-          <label>Download url</label>
-          <Input
-            name="txtDownloadUrl"
-            label="http://"
-            placeholder="mysite.com"
-            value={this.state.downloadUrl}
-            onChange={this.handleChangeValue}
-          />
-        </Form.Field>
-        <Form.Field>
-          <label>Version</label>
-          <input
-            name="txtVersion"
-            type="text"
-            placeholder="6.0"
-            value={this.state.version}
-            onChange={this.handleChangeValue}
-          ></input>
-        </Form.Field>
-        <Form.Field>
-          <label>Reason</label>
-          <TextArea
-            name="txtReason"
-            type="text"
-            placeholder="Meri Marzi"
-            value={this.state.reason}
-            onChange={this.handleChangeValue}
-          ></TextArea>
-          <this.renderRequiredField name="reason"></this.renderRequiredField>
-        </Form.Field>
-        <Form.Field>
-          <Select
-            name="cmbIsFree"
-            placeholder="Free/Paid"
-            options={this.isFreeOptions}
-            onChange={this.handleSelectionChange}
-            value={this.state.isFree}
-          ></Select>
-        </Form.Field>
-        <Form.Field>
-          <Select
-            name="cmbTeamLead"
-            placeholder="Team Lead"
-            options={this.teamLeadOptions}
-            onChange={this.handleSelectionChange}
-            value={this.state.teamLead}
-          ></Select>
-          <this.renderRequiredField name="teamLead"></this.renderRequiredField>
-        </Form.Field>
-        <Form.Field className={this.state.hideBtnCreateRequest}>
-          <Button
-            disabled={this.requestId === 0 ? false : true}
-            name="btnCreateReq"
-            positive
-            onClick={this.createNewRequest}
-          >
-            Create Request
-          </Button>
-        </Form.Field>
-      </Form>
+      <div>
+        <h2 className="ui header no-anchor">Software Request</h2>
+        <Form style={this.formStyles}>
+          <Form.Field>
+            <label>Software Name</label>
+            <input
+              name="txtSoftwareName"
+              type="text"
+              placeholder="Python"
+              value={this.state.softwareName}
+              onChange={this.handleChangeValue}
+            ></input>
+            <this.renderRequiredField name="softwareName"></this.renderRequiredField>
+          </Form.Field>
+          <Form.Field>
+            <label>Tags</label>
+            <input
+              name="txtTags"
+              type="text"
+              placeholder="scripting, formula"
+              value={this.state.tags}
+              onChange={this.handleChangeValue}
+            ></input>
+          </Form.Field>
+          <Form.Field>
+            <label>Download url</label>
+            <Input
+              name="txtDownloadUrl"
+              label="http://"
+              placeholder="mysite.com"
+              value={this.state.downloadUrl}
+              onChange={this.handleChangeValue}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>Version</label>
+            <input
+              name="txtVersion"
+              type="text"
+              placeholder="6.0"
+              value={this.state.version}
+              onChange={this.handleChangeValue}
+            ></input>
+          </Form.Field>
+          <Form.Field>
+            <label>Reason</label>
+            <TextArea
+              name="txtReason"
+              type="text"
+              placeholder="Meri Marzi"
+              value={this.state.reason}
+              onChange={this.handleChangeValue}
+            ></TextArea>
+            <this.renderRequiredField name="reason"></this.renderRequiredField>
+          </Form.Field>
+          <Form.Field>
+            <Select
+              name="cmbIsFree"
+              placeholder="Free/Paid"
+              options={this.isFreeOptions}
+              onChange={this.handleSelectionChange}
+              value={this.state.isFree}
+            ></Select>
+          </Form.Field>
+          <Form.Field>
+            <Select
+              name="cmbTeamLead"
+              placeholder="Team Lead"
+              options={this.teamLeadOptions}
+              onChange={this.handleSelectionChange}
+              value={this.state.teamLead}
+            ></Select>
+            <this.renderRequiredField name="teamLead"></this.renderRequiredField>
+          </Form.Field>
+
+          <Form.Field className={this.state.hideBtnCreateRequest}>
+            <Button
+              disabled={this.requestId === 0 ? false : true}
+              name="btnCreateReq"
+              positive
+              onClick={this.createNewRequest}
+            >
+              Create Request
+            </Button>
+          </Form.Field>
+          <Form.Field className={this.state.hideComments}>
+            <label>Comments</label>
+            <TextArea
+              name="txtComments"
+              type="text"
+              placeholder="It's Okay!"
+              value={this.state.comments}
+              onChange={this.handleChangeValue}
+            ></TextArea>
+          </Form.Field>
+          <Form.Field className={this.state.hideDownloadLocation}>
+            <label>Download Location</label>
+            <input
+              name="txtDlownloadLocation"
+              type="text"
+              placeholder="Python"
+              value={this.state.downloadLocation}
+              onChange={this.handleChangeValue}
+            ></input>
+          </Form.Field>
+          <Form.Field className={this.state.hideBtnApprove}>
+            <Button.Group>
+              <Button
+                name="btnReject"
+                onClick={this.approveRequest.bind(this, false)}
+              >
+                Reject
+              </Button>
+              <Button.Or />
+              <Button
+                name="btnApproved"
+                positive
+                onClick={this.approveRequest.bind(this, true)}
+              >
+                Approved
+              </Button>
+            </Button.Group>
+          </Form.Field>
+        </Form>
+      </div>
     );
   }
 }

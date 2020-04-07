@@ -19,8 +19,8 @@ const softwareRequestSchema = new mongoose.Schema({
     StateID: { type: Number },
     ModifiedBy: { type: Number },
     ModifiedDate: { type: Date, default: Date.now },
-    Comments: { type: String }
-  }
+    Comments: { type: String },
+  },
 });
 
 //Middleware function: it will always execute post saving, you can also use pre. Always register this before initializing model to work.
@@ -47,8 +47,8 @@ async function createSoftwareRequest(params: any) {
     TeamLead: params.teamLead,
     RequestState: {
       StateID: 1,
-      ModifiedBy: params.userId
-    }
+      ModifiedBy: params.userId,
+    },
   });
 
   newRequest.save();
@@ -63,7 +63,7 @@ async function fetchSoftwareRequests(id: any, softwareName: string) {
     query = model.findById(id);
   } else if (softwareName !== null && softwareName !== undefined) {
     query = model.find({
-      SoftwareName: { $regex: ".*" + softwareName + ".*", $options: "i" }
+      SoftwareName: { $regex: ".*" + softwareName + ".*", $options: "i" },
     });
   } else {
     query = model.find({});
@@ -73,7 +73,40 @@ async function fetchSoftwareRequests(id: any, softwareName: string) {
   return response;
 }
 
+async function approveRequest(params: any) {
+  if (!model) {
+    constructModel();
+  }
+
+  model.findById(params.requestId, function (err: any, request: any) {
+    if (!err) {
+      request.DownloadLocation = params.downloadLocation;
+      request.RequestState = {
+        StateID: params.stateId,
+        Comments: params.comments,
+        ModifiedBy: params.userId,
+      };
+      request.save();
+    } else {
+      console.log("Error occurred : " + err);
+    }
+  });
+
+  model.updateOne(
+    { _id: params.requestId },
+    {
+      DownloadLocation: params.downloadLocation,
+      RequestState: {
+        StateID: params.stateId,
+        Comments: params.comments,
+        ModifiedBy: params.userId,
+      },
+    }
+  );
+}
+
 export default {
   createSoftwareRequest,
-  fetchSoftwareRequests
+  fetchSoftwareRequests,
+  approveRequest,
 };

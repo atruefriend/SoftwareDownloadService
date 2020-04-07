@@ -49,7 +49,7 @@ var RequestStateLogSchema = new mongoose.Schema({
     StateID: { type: Number },
     ModifiedBy: { type: Number },
     ModifiedDate: { type: Date, default: Date.now },
-    Comments: { type: String }
+    Comments: { type: String },
 });
 function constructModel() {
     model = mongodb_1.connection.model(collection, RequestStateLogSchema);
@@ -67,7 +67,8 @@ function createRequestStateLog(params) {
                         RequestID: params._id,
                         StateID: params.RequestState.StateID,
                         ModifiedBy: params.RequestState.ModifiedBy,
-                        ModifiedDate: params.RequestState.ModifiedDate
+                        ModifiedDate: params.RequestState.ModifiedDate,
+                        Comments: params.RequestState.Comments,
                     });
                     return [4 /*yield*/, mail_1.default
                             .sendMail(params)
@@ -81,6 +82,6 @@ function createRequestStateLog(params) {
     });
 }
 exports.default = {
-    createRequestStateLog: createRequestStateLog
+    createRequestStateLog: createRequestStateLog,
 };
 //# sourceMappingURL=RequestStateLog.js.map

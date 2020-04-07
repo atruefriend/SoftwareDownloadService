@@ -30,8 +30,13 @@ async function fetchSoftwareRequests(id: any, softwareName: string) {
   return await SoftwareRequest.fetchSoftwareRequests(id, softwareName);
 }
 
+async function approveRequest(params: any) {
+  return await SoftwareRequest.approveRequest(params);
+}
+
 export default {
   connect,
   createSoftwareRequest,
-  fetchSoftwareRequests
+  fetchSoftwareRequests,
+  approveRequest,
 };

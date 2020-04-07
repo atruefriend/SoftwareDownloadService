@@ -118,13 +118,45 @@ app.post("/newRequest", function (req, res) {
                         version: version,
                         reason: reason,
                         isFree: isFree,
-                        teamLead: teamLead
+                        teamLead: teamLead,
                     };
                     return [4 /*yield*/, mongodb_1.default.createSoftwareRequest(params)];
                 case 1:
                     result = _a.sent();
                     if (result === null || result === undefined) {
                         res.send("Request created successfully!");
+                    }
+                    else {
+                        res.send("Error occurred :" + result);
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+});
+app.post("/approveRequest", function (req, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var requestId, comments, downloadLocation, stateId, userId, params, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    requestId = req.body.requestId;
+                    comments = req.body.comments;
+                    downloadLocation = req.body.downloadLocation;
+                    stateId = req.body.stateId;
+                    userId = 1;
+                    params = {
+                        userId: userId,
+                        requestId: requestId,
+                        comments: comments,
+                        downloadLocation: downloadLocation,
+                        stateId: stateId,
+                    };
+                    return [4 /*yield*/, mongodb_1.default.approveRequest(params)];
+                case 1:
+                    result = _a.sent();
+                    if (result === null || result === undefined) {
+                        res.send("Request approved successfully!");
                     }
                     else {
                         res.send("Error occurred :" + result);
