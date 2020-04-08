@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ReactDom from "react-dom";
-import "semantic-ui-css/semantic.min.css";
 import Api from "../Api";
+import "semantic-ui-css/semantic.min.css";
 import {
   Form,
   Select,
@@ -269,7 +269,7 @@ class NewRequest extends Component {
   render() {
     return (
       <div>
-        <h2 className="ui header no-anchor">Software Request</h2>
+        <h2 className="ui heading no-anchor">Software Request</h2>
         <Form style={this.formStyles}>
           <Form.Field>
             <label>Software Name</label>

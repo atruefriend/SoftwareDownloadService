@@ -29,26 +29,21 @@ ul li {
   list-style: none;
 }
 .price {
-  color: #3abd69;
   position: relative;
   text-transform: uppercase;
   font-weight: bold;
 }
-.search {
-  width: 500px !important;
-  margin: 0px 8px 8px 0px !important;
-}
-.item {
-  margin-top: 5px;
-}
-.customform {
-  margin: 20px 20px 0 20px;
+
+.top-spacing {
+  margin-top: 5px !important;
 }
 
-.center {
-  width: 100%;
-  float: left;
-  text-align: center;
+.free {
+  color: #3abd69;
+}
+
+.paid {
+  color: #f54b42;
 }
 
 .hide {
