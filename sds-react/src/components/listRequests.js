@@ -13,6 +13,8 @@ import {
 import NewRequest from "./newRequest";
 import dateFormat from "dateformat";
 import "../main.css";
+import { User } from "./user";
+const userContext = React.createContext(User);
 
 class ListRequests extends Component {
   state = {
@@ -22,6 +24,7 @@ class ListRequests extends Component {
     requestId: 0,
     requestState: 0,
     activeMenuItem: 0,
+    user: User,
   };
   constructor(props) {
     super(props);
@@ -34,10 +37,21 @@ class ListRequests extends Component {
     this.closeRequestForm = this.closeRequestForm.bind(this);
     this.bindData = this.bindData.bind(this);
     this.processRequest = this.processRequest.bind(this);
+    this.handleActiveMenu = this.handleActiveMenu.bind(this);
   }
 
   componentDidMount() {
     //debugger;
+    //Get the logged in User and set the context
+    const User = {
+      UserId: 1,
+      Name: "Nikhil Gupta",
+      Email: "NikhilG@NavBackoffice.com",
+      UserName: "NikhilG",
+    };
+
+    this.setState({ user: User });
+
     this.getData();
     this.processRequest();
   }
@@ -54,16 +68,16 @@ class ListRequests extends Component {
     }
   }
 
-  handleActiveMenu(item, e) {
-    this.setState({ activeMenuItem: item });
+  handleActiveMenu(e, { value }) {
+    this.setState({ activeMenuItem: Number(value) }, () => {
+      this.bindData();
+    });
   }
 
   async getData(e) {
     let serviceResponse = null;
-    const s = this.search.current.value;
-    const params = [{ name: "softwareName", value: s }];
     try {
-      await Api.GetData("getRequests", params).then((response) => {
+      await Api.GetData("getRequests", null).then((response) => {
         serviceResponse = response;
       });
       if (serviceResponse !== null && serviceResponse !== undefined) {
@@ -77,9 +91,22 @@ class ListRequests extends Component {
 
   bindData(e) {
     let requestsList = [];
-    const s = this.search.current.value.toUpperCase();
+    const searchText = this.search.current.value.toUpperCase();
+
     this.state.requestData.map((record) => {
-      if (record.SoftwareName.toUpperCase().includes(s)) {
+      if (
+        record.SoftwareName.toUpperCase().includes(searchText) &&
+        ((this.state.activeMenuItem > 2 &&
+          record.UserID === this.state.user.UserId) ||
+          this.state.activeMenuItem < 3) &&
+        ((this.state.activeMenuItem === 0 || this.state.activeMenuItem === 3) ||
+        (((this.state.activeMenuItem === 1 &&
+          record.RequestState.StateID === 4) ||
+          (this.state.activeMenuItem === 4 &&
+            record.RequestState.StateID === 4)) ||
+        ((this.state.activeMenuItem === 2 || this.state.activeMenuItem === 5) &&
+        (record.RequestState.StateID === 1 || record.RequestState.StateID === 2))))
+      ) {
         requestsList.push(
           <div className="col-md-6">
             <div className="col-md-12">
@@ -103,7 +130,7 @@ class ListRequests extends Component {
                 <div>
                   <ul className="subdown">
                     <li className="left">
-                      {dateFormat(record.CreationDate, "mmm-ddS-yyyy")}
+                      {dateFormat(record.CreatedOn, "mmm-ddS-yyyy")}
                     </li>
                     <li
                       className={
@@ -145,140 +172,148 @@ class ListRequests extends Component {
 
   render() {
     return (
-      <React.Fragment>
-        <Modal
-          open={this.state.showRequest}
-          onClose={this.closeRequestForm}
-          size="small"
-        >
-          <Modal.Content>
-            <NewRequest
-              requestId={this.state.requestId}
-              requestState={this.state.requestState}
-              closeForm={this.closeRequestForm}
-            ></NewRequest>
-          </Modal.Content>
-        </Modal>
-        <div className="header">
-          <div className="container">
+      <userContext.Provider value={this.state.user}>
+        <React.Fragment>
+          <Modal
+            open={this.state.showRequest}
+            onClose={this.closeRequestForm}
+            size="small"
+          >
+            <Modal.Content>
+              <NewRequest
+                requestId={this.state.requestId}
+                requestState={this.state.requestState}
+                closeForm={this.closeRequestForm}
+              ></NewRequest>
+            </Modal.Content>
+          </Modal>
+          <div className="header">
+            <div className="container">
+              <div className="row">
+                <div className="col-md-5">
+                  <div className="logo">
+                    <h1>
+                      <a>Software Download Service</a>
+                    </h1>
+                  </div>
+                </div>
+                <div className="col-md-5">
+                  <div className="row">
+                    <div className="col-lg-12">
+                      <div className="input-group form">
+                        <input
+                          type="text"
+                          name="txtSearch"
+                          ref={this.search}
+                          placeholder="Search..."
+                          onChange={this.bindData}
+                          className="form-control"
+                        />
+                        <span className="input-group-btn">
+                          <Form.Button
+                            name="btn btn-primary"
+                            color="facebook"
+                            onClick={this.getData}
+                          >
+                            Search
+                          </Form.Button>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <div className="row">
+                    <div className="col-lg-12">
+                      <div className="input-group form">
+                        <span className="input-group-btn">
+                          <Form.Button
+                            name="btnNewRequest"
+                            onClick={this.showRequestForm.bind(this, 0, 0)}
+                            positive
+                          >
+                            New Request
+                          </Form.Button>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="page-content">
             <div className="row">
-              <div className="col-md-5">
-                <div className="logo">
-                  <h1>
-                    <a>Software Download Service</a>
-                  </h1>
-                </div>
-              </div>
-              <div className="col-md-5">
-                <div className="row">
-                  <div className="col-lg-12">
-                    <div className="input-group form">
-                      <input
-                        type="text"
-                        name="txtSearch"
-                        ref={this.search}
-                        placeholder="Search..."
-                        onChange={this.bindData}
-                        className="form-control"
-                      />
-                      <span className="input-group-btn">
-                        <Form.Button
-                          name="btn btn-primary"
-                          color="facebook"
-                          onClick={this.getData}
-                        >
-                          Search
-                        </Form.Button>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <div className="col-md-2">
-                <div className="row">
-                  <div className="col-lg-12">
-                    <div className="input-group form">
-                      <span className="input-group-btn">
-                        <Form.Button
-                          name="btnNewRequest"
-                          onClick={this.showRequestForm.bind(this, 0, 0)}
-                          positive
-                        >
-                          New Request
-                        </Form.Button>
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <Menu vertical>
+                  <Menu.Item>
+                    <Icon name="user"></Icon>
+                    <span className="heading">{this.state.user.Name}</span>
+                  </Menu.Item>
+                  <Menu.Item>
+                    <span className="heading">Requests</span>
+                    <Menu.Menu>
+                      <Menu.Item
+                        name="All Requests"
+                        value="0"
+                        active={this.state.activeMenuItem === 0}
+                        onClick={this.handleActiveMenu}
+                      />
+                      <Menu.Item
+                        name="Completetd Requests"
+                        value="1"
+                        active={this.state.activeMenuItem === 1}
+                        onClick={this.handleActiveMenu}
+                      />
+                      <Menu.Item
+                        name="Pending Requests"
+                        value="2"
+                        active={this.state.activeMenuItem === 2}
+                        onClick={this.handleActiveMenu}
+                      />
+                    </Menu.Menu>
+                  </Menu.Item>
+                  <Menu.Item>
+                    <span className="heading">My Requests</span>
+                    <Menu.Menu>
+                      <Menu.Item
+                        name="All Requests"
+                        value="3"
+                        active={this.state.activeMenuItem === 3}
+                        onClick={this.handleActiveMenu}
+                      />
+                      <Menu.Item
+                        name="Completetd Requests"
+                        value="4"
+                        active={this.state.activeMenuItem === 4}
+                        onClick={this.handleActiveMenu}
+                      />
+                      <Menu.Item
+                        name="Pending Requests"
+                        value="5"
+                        active={this.state.activeMenuItem === 5}
+                        onClick={this.handleActiveMenu}
+                      />
+                    </Menu.Menu>
+                  </Menu.Item>
+                  <Menu.Item>
+                    <Button
+                      name="btnNewRequest"
+                      onClick={this.showRequestForm.bind(this, 0, 0)}
+                      positive
+                    >
+                      New Request
+                    </Button>
+                  </Menu.Item>
+                </Menu>
+              </div>
+              <div className="col-md-10 top-spacing">
+                <div className="row">{this.state.requests}</div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="page-content">
-          <div className="row">
-            <div className="col-md-2">
-              <Menu vertical>
-                <Menu.Item>
-                  <Icon name="user"></Icon>
-                  <span className="heading">Nikhil Gupta</span>
-                </Menu.Item>
-                <Menu.Item>
-                  <span className="heading">Requests</span>
-                  <Menu.Menu>
-                    <Menu.Item
-                      name="All Requests"
-                      active={this.state.activeMenuItem === 0}
-                      onClick={this.handleActiveMenu.bind(this, 0)}
-                    />
-                    <Menu.Item
-                      name="Completetd Requests"
-                      active={this.state.activeMenuItem === 1}
-                      onClick={this.handleActiveMenu.bind(this, 1)}
-                    />
-                    <Menu.Item
-                      name="Pending Requests"
-                      active={this.state.activeMenuItem === 2}
-                      onClick={this.handleActiveMenu.bind(this, 2)}
-                    />
-                  </Menu.Menu>
-                </Menu.Item>
-                <Menu.Item>
-                  <span className="heading">My Requests</span>
-                  <Menu.Menu>
-                    <Menu.Item
-                      name="All Requests"
-                      active={this.state.activeMenuItem === 3}
-                      onClick={this.handleActiveMenu.bind(this, 3)}
-                    />
-                    <Menu.Item
-                      name="Completetd Requests"
-                      active={this.state.activeMenuItem === 4}
-                      onClick={this.handleActiveMenu.bind(this, 4)}
-                    />
-                    <Menu.Item
-                      name="Pending Requests"
-                      active={this.state.activeMenuItem === 5}
-                      onClick={this.handleActiveMenu.bind(this, 5)}
-                    />
-                  </Menu.Menu>
-                </Menu.Item>
-                <Menu.Item>
-                  <Button
-                    name="btnNewRequest"
-                    onClick={this.showRequestForm.bind(this, 0, 0)}
-                    positive
-                  >
-                    New Request
-                  </Button>
-                </Menu.Item>
-              </Menu>
-            </div>
-            <div className="col-md-10 top-spacing">
-              <div className="row">{this.state.requests}</div>
-            </div>
-          </div>
-        </div>
-      </React.Fragment>
+        </React.Fragment>
+      </userContext.Provider>
     );
   }
 }
