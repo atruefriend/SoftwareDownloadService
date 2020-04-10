@@ -187,7 +187,7 @@ class ListRequests extends Component {
           <div className="content-box-large">
             <div className="no-result">
               <img src={oopsIcon} alt="oops"></img>
-              <p>No software available! Would you like add one.</p>
+              <p>No software available! Would you like to add one.</p>
               <Button
                 name="btnNewRequest"
                 onClick={this.showRequestForm.bind(this, 0, 0)}
