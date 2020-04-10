@@ -57,3 +57,18 @@ ul li {
 .main {
   background: #f7f7f7 !important;
 }
+
+.no-result
+{
+  text-align: center;
+}
+
+.no-result p
+{
+  font-size: 24px;
+  color: #000;
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 30px;
+  margin: 0;
+}

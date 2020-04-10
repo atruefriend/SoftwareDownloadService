@@ -14,7 +14,10 @@ import NewRequest from "./newRequest";
 import dateFormat from "dateformat";
 import "../main.css";
 import { User } from "./user";
+import oopsIcon from "../images/oops.jpg";
+import shyIcon from "../images/shy_blush.png";
 const userContext = React.createContext(User);
+
 
 class ListRequests extends Component {
   state = {
@@ -32,12 +35,15 @@ class ListRequests extends Component {
     this.showRequest = false;
     this.requestId = 0;
     this.requestState = 0;
+    this.interval = null;
+    this.refreshTime = 300000;//5 min
     this.search = React.createRef();
     this.getData = this.getData.bind(this);
     this.closeRequestForm = this.closeRequestForm.bind(this);
     this.bindData = this.bindData.bind(this);
     this.processRequest = this.processRequest.bind(this);
     this.handleActiveMenu = this.handleActiveMenu.bind(this);
+    this.refreshPage = this.refreshPage.bind(this);
   }
 
   componentDidMount() {
@@ -54,6 +60,23 @@ class ListRequests extends Component {
 
     this.getData();
     this.processRequest();
+
+    this.refreshPage();
+  }
+
+  refreshPage()
+  {
+    const interval = setInterval(() => {
+      console.log("getting data");
+      this.getData();
+    }, this.refreshTime);
+
+    this.setState({interval: interval});
+  }
+
+  componentWillUnmount()
+  {
+    clearTimeout(this.state.interval);
   }
 
   processRequest() {
@@ -75,6 +98,7 @@ class ListRequests extends Component {
   }
 
   async getData(e) {
+    console.log("Data Fecthed");
     let serviceResponse = null;
     try {
       await Api.GetData("getRequests", null).then((response) => {
@@ -156,6 +180,27 @@ class ListRequests extends Component {
         );
       }
     });
+    if(requestsList.length === 0)
+    {
+      requestsList.push(
+        <div className="col-md-10">
+          <div className="content-box-large">
+            <div className="no-result">
+              <img src={oopsIcon} alt="oops"></img>
+              <p>No software available! Would you like add one.</p>
+              <Button
+                name="btnNewRequest"
+                onClick={this.showRequestForm.bind(this, 0, 0)}
+                positive
+              >
+                <img className="icon" src={shyIcon}></img>
+                New Request
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
     this.setState({ requests: requestsList });
   }
 
